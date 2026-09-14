@@ -1,6 +1,6 @@
 
 import pandas as pd
-from pywib.constants import ColumnNames, EventTypes, KeyCodeEvents
+from pywib.constants import ColumnNames, EventTypes, KeyValues
 from pywib.utils.validation import validate_dataframe_keyboard 
 from pywib.utils.segmentation import extract_keystroke_traces
 
@@ -25,11 +25,11 @@ def _typing_durations_per_key(df: pd.DataFrame) -> list[float]:
         list[float]: The times in ms of the typing trace
     """
     durations = []
-    current_key_code = -1
+    current_key = -1
     time_start = 0.0
     for _, event in df.iterrows():
-        if(current_key_code != event[ColumnNames.KEY_CODE_EVENT]):
-            current_key_code = event[ColumnNames.KEY_CODE_EVENT]
+        if(current_key != event[ColumnNames.KEY_VALUE]):
+            current_key = event[ColumnNames.KEY_VALUE]
             time_start = event[ColumnNames.TIME_STAMP]
         else:
             if(event[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_UP):
@@ -145,7 +145,7 @@ def backspace_usage_df(df: pd.DataFrame = None, validate: bool = True) -> float:
     """
     if validate:
         validate_dataframe_keyboard(df)
-    mask = (df[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_DOWN) & ( (df[ColumnNames.KEY_CODE_EVENT] == KeyCodeEvents.KEY_CODE_BACKSPACE) | (df[ColumnNames.KEY_CODE_EVENT] == KeyCodeEvents.KEY_CODE_DELETE))
+    mask = (df[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_DOWN) & ( (df[ColumnNames.KEY_VALUE] == KeyValues.KEY_VALUE_BACKSPACE) | (df[ColumnNames.KEY_VALUE] == KeyValues.KEY_VALUE_DELETE))
 
     return int(mask.sum())
 

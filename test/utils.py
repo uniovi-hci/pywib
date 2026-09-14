@@ -40,14 +40,14 @@ def process_csv(file_path):
             row['timeStamp'],
             row['x'],
             row['y'],
-            row['keyValueEvent'],
-            row['keyCodeEvent'],
+            row['keyValue'],
+            row['keyCode'],
         ])
     
     all_sessions = []
     for (session_id), matrix in matrices.items():
         df = pd.DataFrame(matrix, columns=[
-            'eventType', 'timeStamp', 'x', 'y', 'keyValueEvent', 'keyCodeEvent' ])
+            'eventType', 'timeStamp', 'x', 'y', 'keyValue', 'keyCode' ])
         df['sessionId'] = session_id
         all_sessions.append(df)
 

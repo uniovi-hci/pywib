@@ -6,7 +6,7 @@ required_columns = [
 ]
 
 keyboard_columns = [
-   ColumnNames.KEY_VALUE_EVENT, ColumnNames.KEY_CODE_EVENT
+   ColumnNames.KEY_VALUE
 ]
 
 def validate_any_not_none(*params):
