@@ -37,7 +37,10 @@ Backspace Usage
 The number of times a user presses the backspace key during a typing session can be a helpful metric to assess a negative emotional state and error correction behavior :cite:p:`Khanna2010-gn`.
 The function :py:func:`~pywib.backspace_usage` computes the backspace usage from a DataFrame containing keyboard interaction data. The DataFrame should include columns for event type (key press or key release), timestamps, and keys (session or user identifiers).
 
-.. To be added: dwell time, flight time and down-to-down time :cite:p:`Katerina2018-ch`.
+Notes
+------
+
+Metrics to be added to this module could be: dwell time, flight time and down-to-down time from :cite:p:`Katerina2018-ch`.
 
 References
 ----------

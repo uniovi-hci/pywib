@@ -33,9 +33,6 @@ def velocity(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = No
 
     validate_any_not_none(df, traces)
 
-    if df is None and traces is None:
-        raise ValueError("Either 'df' or 'traces' must be provided.")
-
     if not per_traces:
         # Compute directly on the DataFrame (no trace extraction)
         return velocity_df(df)

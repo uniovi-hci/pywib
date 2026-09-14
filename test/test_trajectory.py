@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from utils import assert_between_zero_inf, process_csv, import_pyModule
 
 import_pyModule()
-from pywib import (ColumnNames, extract_traces_by_session, auc)
+from pywib import (ColumnNames, extract_traces_by_session, auc, x_flips, y_flips, deviations, straigthness, visualize_trace)
 
 # Cambiar a True solo al probar en desarrollo
 DEBUG = True
@@ -17,11 +17,15 @@ class TestData:
     if(DEBUG):
         dataFile = 'test/test_data/test_window_resize_error.csv'
         dataFile_2 = 'test/test_data/test_auc.csv'
-        dataFile_3= 'pywib/test/test_data/pauses.csv'
+        dataFile_3 = 'test/test_data/pauses.csv'
+        dataFile_4 = 'test/test_data/test_trajectory_single.csv'
+        dataFile_5 = 'test/test_data/test_trajectory.csv'
     else:
         dataFile = 'pywib/test/test_data/test_window_resize_error.csv'
         dataFile_2= 'pywib/test/test_data/test_auc.csv'
         dataFile_3= 'pywib/test/test_data/pauses.csv'
+        dataFile_4= 'pywib/test/test_data/test_trajectory_single.csv'
+        dataFile_5 = 'pywib/test/test_data/test_trajectory.csv'
 
 
 class TestTrajectory(unittest.TestCase):
@@ -84,6 +88,8 @@ class TestTrajectory(unittest.TestCase):
         # Create sample test data instead of relying on external CSV
         self.test_data = process_csv(TestData.dataFile)
         self.test_data_auc = process_csv(TestData.dataFile_2)
+        self.test_data_flips_single = process_csv(TestData.dataFile_4)
+        self.test_data_flips = process_csv(TestData.dataFile_5)
 
     def test_auc(self):
         auc_geom, auc_exec = auc(self.test_data_auc.copy(), per_traces=False)
@@ -96,6 +102,53 @@ class TestTrajectory(unittest.TestCase):
             for tuple in vals:
                 self.assertGreaterEqual(tuple[0], 0)
                 self.assertGreaterEqual(tuple[1], 0)
+
+    def test_x_flips_df(self):
+        flips = x_flips(self.test_data_flips_single.copy())
+        self.assertGreaterEqual(flips, 0)
+        self.assertEqual(flips, 8)
+
+    def test_y_flips_df(self):
+        flips = y_flips(self.test_data_flips_single.copy())
+        self.assertGreaterEqual(flips, 0)
+        self.assertEqual(flips, 6)
+
+    def test_x_flips_per_trace(self):
+        flips = x_flips(self.test_data_flips_single.copy(), per_traces=True)
+        self.assertGreaterEqual(flips.get("SESSION_A"), 0)
+        self.assertEqual(flips.get("SESSION_A"), 8)
+
+    def test_y_flips_per_trace(self):
+        flips = y_flips(self.test_data_flips_single.copy(), per_traces=True)
+        self.assertGreaterEqual(flips.get("SESSION_A"), 0)
+        self.assertEqual(flips.get("SESSION_A"), 6)
+    
+    def test_x_flips_by_trace(self):
+        traces = extract_traces_by_session(self.test_data_flips.copy()) 
+        flips = x_flips(None, traces, per_traces=True)
+        self.assertGreaterEqual(flips.get("SESSION_A"), 0)
+        self.assertEqual(flips.get("SESSION_A"), 8)
+        self.assertGreaterEqual(flips.get("SESSION_B"), 0)
+        self.assertEqual(flips.get("SESSION_B"), 8)
+
+    def test_y_flips_by_trace(self):
+        traces = extract_traces_by_session(self.test_data_flips.copy()) 
+        flips = y_flips(None, traces, per_traces=True)
+        self.assertGreaterEqual(flips.get("SESSION_A"), 0)
+        self.assertEqual(flips.get("SESSION_A"), 6)
+        self.assertGreaterEqual(flips.get("SESSION_B"), 0)
+        self.assertEqual(flips.get("SESSION_B"), 6)
+
+    def test_deviations(self):
+        dev = deviations(self.test_data_flips.copy())
+        trace = self.test_data_flips.loc[self.test_data_flips["sessionId"] == "SESSION_A"]
+        visualize_trace(trace, trace.index, "SESSION_A")
+        self.assertGreaterEqual(dev.get("SESSION_A"), 0)
+
+    def test_straigthness(self):
+
+        straigthness_val = straigthness(self.test_data_flips_single.copy())
+        self.assertGreaterEqual(straigthness_val.get("SESSION_A"), 0)
 
 
 if __name__ == '__main__':

@@ -389,3 +389,11 @@ def auc_ratio_traces(traces: dict[str, list[pd.DataFrame]]) -> dict[list[dict]]:
         auc_metrics[session_id] = auc_metrics_per_trace
     return auc_metrics
 
+def flips(df: pd.DataFrame = None, column: str = ColumnNames.DX, threshold: float = 0.1) -> int:
+    d_col = df[column].to_numpy()
+
+    d_col_filtered = d_col[np.abs(d_col) > threshold]
+
+    n_flips = np.sum(np.diff(np.sign(d_col_filtered)) != 0)
+
+    return n_flips

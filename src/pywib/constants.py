@@ -95,6 +95,9 @@ class ColumnNames:
     MAD_MAX = 'mad_mad'
     MIN_MAD = 'mean_mad'
     MEAN_MAD = 'min_mad'
+    ANGLE = 'angle'
+    ANGULAR_VELOCITY="angular_velocity"
+    ANGULAR_ACCELERATION="angular_acceleration"
 
 class KeyCodeEvents:
     """ Key code event constants for keyboard interactions."""

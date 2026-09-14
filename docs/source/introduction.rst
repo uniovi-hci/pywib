@@ -9,8 +9,6 @@ It provides tools to compute various interaction related metrics (like velocity,
 
 Rationale
 =============
-...
-
 The analyisis of mouse interaction has been widely used in HCI to infer in several aspects of the users interaction with the system.
 This mouse dynamics have been proven useful for analysing bheavioral patterns :cite:p:`Katerina2018-ch,Cepeda2018-kn`, 
 cognitive and physicial conditions affecting the user :cite:p:`Seelye2015-yxm, Khan2008-is, Rhim2023-uz` 

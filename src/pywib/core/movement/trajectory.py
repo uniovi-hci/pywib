@@ -5,7 +5,7 @@ from pywib.utils import (_path, validate_dataframe, compute_space_time_diff,
                          extract_traces_by_session, 
                          auc_ratio_traces)
 from pywib.constants import ColumnNames
-from pywib.utils.movement import auc_df, auc_traces
+from pywib.utils.movement import auc_df, auc_traces, flips
 from pywib.utils.utils import deprecated
 from pywib.utils.validation import validate_any_not_none
 
@@ -198,3 +198,347 @@ def deviations(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = 
         }
 
     return metrics
+
+def angle(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None) -> dict:
+    """
+    Angle formed by 3 consecutive points.
+    Computed using formula:
+    0i = arcos((yi+1-yi,xi+1-xi)*(yi-1-yi,xi-1-xi)/(di+1*di))
+    """
+    validate_any_not_none(df, traces)
+
+    if traces is None:
+        validate_dataframe(df)
+        traces = extract_traces_by_session(df)
+
+    for session_id, session_traces in traces.items():
+        for trace in session_traces:
+            trace[ColumnNames.ANGLE] = np.nan
+            for i in range(1, len(trace) - 1):
+                idx = trace.index[i]
+                prev_idx = trace.index[i - 1]
+                next_idx = trace.index[i + 1]
+
+                v1 = np.array([
+                    trace.at[idx, ColumnNames.Y] - trace.at[prev_idx, ColumnNames.Y],
+                    trace.at[idx, ColumnNames.X] - trace.at[prev_idx, ColumnNames.X],
+                ])
+                v2 = np.array([
+                    trace.at[next_idx, ColumnNames.Y] - trace.at[idx, ColumnNames.Y],
+                    trace.at[next_idx, ColumnNames.X] - trace.at[idx, ColumnNames.X],
+                ])
+
+                n1 = np.linalg.norm(v1)
+                n2 = np.linalg.norm(v2)
+                if n1 == 0 or n2 == 0:
+                    trace.at[idx, ColumnNames.ANGLE] = np.nan
+                    continue
+
+                trace.at[idx, ColumnNames.ANGLE] = np.arccos(np.clip(np.dot(v1, v2) / (n1 * n2), -1.0, 1.0))
+            trace[ColumnNames.ANGLE].fillna(0) # TODO consider
+    return traces
+
+def angular_velocity(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None) -> dict:
+    """
+    Angular velocity computed as the change in angle over time.
+    """
+    
+    validate_any_not_none(df, traces)
+    
+    if(df is not None):
+        validate_dataframe(df)
+        if(ColumnNames.ANGLE not in df.columns):
+            df = angle(df, traces)
+        return angular_velocity_df(df)
+ 
+        # If traces are not provided, extract them from df
+    if traces is not None:
+        for _, session_traces in traces.items():
+            for trace in session_traces:
+                trace = angular_velocity_df(trace)
+    return traces
+
+def angular_velocity_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute the angular velocity for a given DataFrame.
+    Angular velocity is calculated as the change in angle over time.
+    
+    Parameters:
+        df (pd.DataFrame): DataFrame containing 'timeStamp' and 'angle' columns.
+    
+    Returns:
+        pd.DataFrame: DataFrame with an additional 'angular_velocity' column representing the angular velocity.
+    """
+    validate_dataframe(df)
+    
+    if ColumnNames.ANGLE not in df.columns:
+        df = angle(df)
+
+    df[ColumnNames.ANGLE] = df[ColumnNames.ANGLE].fillna(0)
+    df[ColumnNames.ANGULAR_VELOCITY] = np.where(df[ColumnNames.DT] != 0, df[ColumnNames.ANGLE].diff().fillna(0) / df[ColumnNames.DT], 0)
+    return df
+
+def angular_acceleration(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None) -> dict:
+    """
+    Angular acceleration computed as the change in angular velocity over time.
+    """
+    
+    validate_any_not_none(df, traces)
+    
+    if(df is not None):
+        validate_dataframe(df)
+        if(ColumnNames.ANGULAR_VELOCITY not in df.columns):
+            df = angular_velocity_df(df)
+        return angular_acceleration_df(df)
+ 
+        # If traces are not provided, extract them from df
+    if traces is not None:
+        for _, session_traces in traces.items():
+            for trace in session_traces:
+                trace = angular_acceleration_df(trace)
+    return traces
+
+def angular_acceleration_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute the angular acceleration for a given DataFrame.
+    Angular acceleration is calculated as the change in angular velocity over time.
+    
+    Parameters:
+        df (pd.DataFrame): DataFrame containing 'timeStamp' and 'angular_velocity' columns.
+    
+    Returns:
+        pd.DataFrame: DataFrame with an additional 'angular_acceleration' column representing the angular acceleration.
+    """
+    validate_dataframe(df)
+    
+    if ColumnNames.ANGULAR_VELOCITY not in df.columns:
+        df = angular_velocity_df(df)
+
+    df[ColumnNames.ANGULAR_ACCELERATION] = np.where(df[ColumnNames.DT] != 0, df[ColumnNames.ANGULAR_VELOCITY].diff().fillna(0) / df[ColumnNames.DT], 0)
+    return df
+
+def direction_changes(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces: bool = False) -> pd.DataFrame | dict:
+    """
+        Calculate the number of direction changes in the given DataFrame.
+        Parameters:
+            df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
+            traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
+            per_traces (bool): Whether to return the result for each trace separately. If False, returns the total count as an integer.
+    """
+
+    validate_any_not_none(df, traces)
+
+    if not per_traces and df is not None:
+        df = compute_space_time_diff(df)
+        # Compute directly on the DataFrame (no trace extraction
+        directions = np.arctan2(df[ColumnNames.DY], df[ColumnNames.DX])
+
+        angle_diff = np.diff(directions)
+        angle_diff = np.arctan2(np.sin(angle_diff), np.cos(angle_diff))
+
+        # Calculate the changes in direction
+        direction_changes = np.sum(np.abs(angle_diff) > np.pi / 4)  # Consider a change if the angle changes more than 45 degrees
+        return direction_changes
+
+    if traces is None and per_traces:
+        validate_dataframe(df)
+        traces = extract_traces_by_session(df)
+
+    direction_changes_per_trace = {}
+    for session_id, session_traces in traces.items():
+        for trace in session_traces:
+            trace = compute_space_time_diff(trace)
+            directions = np.arctan2(trace[ColumnNames.DY], trace[ColumnNames.DX])
+            angle_diff = np.diff(directions)
+            angle_diff = np.arctan2(np.sin(angle_diff), np.cos(angle_diff))
+            direction_changes = np.sum(np.abs(angle_diff) > np.pi / 4)  # Consider a change if the angle changes more than 45 degrees
+            direction_changes_per_trace[session_id] = direction_changes
+    
+    return direction_changes_per_trace
+
+def x_flips(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, threshold: float = 0.1, per_traces: bool = False) -> int | dict:
+    """
+    Calculate the number of x-direction flips in the given DataFrame.
+    
+    **Metric Context Specificity**: If performed by trace, it will sum the flips of all traces in a session. 
+    A session that has a flip between the end of a trace and the beginning of the next one will **not** be counted as a flip as computations are done trace by trace, so if you want to consider those flips, you should compute them on the whole dataframe or consider the traces as a single one.
+    Parameters:
+        df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
+        traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
+        threshold (float): The threshold for considering a flip.
+        per_traces (bool): Whether to return the result for each trace separately. If False, returns the total count as an integer.
+    Returns:
+    int | dict: The number of x-direction flips or a dictionary with the count for each session.
+    """
+    validate_any_not_none(df, traces)
+
+    if not per_traces:
+        validate_dataframe(df)
+        if (ColumnNames.DX not in df.columns):
+            df = compute_space_time_diff(df)
+        return flips(df, column=ColumnNames.DX, threshold=threshold)
+    
+    if traces is None:
+            validate_dataframe(df)
+            traces = extract_traces_by_session(df)
+
+    flips_per_session = {}
+    if traces is not None:
+        for session_id, session_traces in traces.items():
+            for trace in session_traces:
+                if (ColumnNames.DX not in trace.columns):
+                    trace = compute_space_time_diff(trace)
+                flips_per_session[session_id] = flips_per_session.get(session_id, 0) + flips(trace, column=ColumnNames.DX, threshold=threshold)
+
+    return flips_per_session
+
+def y_flips(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, threshold: float = 0.1, per_traces: bool = False) -> int | dict:
+    """
+    Calculate the number of y-direction flips in the given DataFrame.
+
+    **Metric Context Specificity**: If performed by trace, it will sum the flips of all traces in a session. 
+    A session that has a flip between the end of a trace and the beginning of the next one will **not** be counted as a flip as computations are done trace by trace, so if you want to consider those flips, you should compute them on the whole dataframe or consider the traces as a single one.
+    Parameters:
+        df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
+        traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
+        threshold (float): The threshold for considering a flip.
+        per_traces (bool): Whether to return the result for each trace separately. If False, returns the total count as an integer.
+    Returns:
+        int | dict: The number of y-direction flips or a dictionary with the count for each session.
+    """
+    validate_any_not_none(df, traces)
+
+    if not per_traces:
+        validate_dataframe(df)
+        if (ColumnNames.DY not in df.columns):
+            df = compute_space_time_diff(df)
+        return flips(df, column=ColumnNames.DY, threshold=threshold)
+    
+    if traces is None:
+        validate_dataframe(df)
+        traces = extract_traces_by_session(df)
+
+    flips_per_session = {}
+    if traces is not None:
+        flips_per_session = {}
+        for session_id, session_traces in traces.items():
+            for trace in session_traces:
+                if (ColumnNames.DY not in trace.columns):
+                    trace = compute_space_time_diff(trace)
+                flips_per_session[session_id] = flips_per_session.get(session_id, 0) + flips(trace, column=ColumnNames.DY, threshold=threshold)
+    
+    return flips_per_session
+
+def curvature(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None) -> dict:
+    """
+    Calculate the curvature of the trajectory in the given DataFrame.
+    Curvature is calculated as the change in direction over the change in distance.
+    Parameters:
+        df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
+        traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
+    Returns:
+        dict: A dictionary with keys as (sessionId) and values as the average curvature for that session.
+    """
+    
+    validate_any_not_none(df, traces)
+
+    if traces is None:
+        validate_dataframe(df)
+        traces = extract_traces_by_session(df)
+
+    curvature_per_session = {}
+    for session_id, session_traces in traces.items():
+        curvatures = []
+        for trace in session_traces:
+            trace = compute_space_time_diff(trace)
+            directions = np.arctan2(trace[ColumnNames.DY], trace[ColumnNames.DX])
+            distance = trace[ColumnNames.DISTANCE]
+            curvature = np.abs(np.diff(directions)) / distance[1:].values  # Curvature is change in direction over change in distance
+            curvatures.append(np.mean(curvature))
+        curvature_per_session[session_id] = np.mean(curvatures) if curvatures else 0
+    
+    return curvature_per_session
+
+def inflections(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None) -> dict:
+    """
+    Calculate the number of inflection points in the trajectory of the given DataFrame.
+    Inflection points are points where the curvature changes sign.
+    Parameters:
+        df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
+        traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
+    Returns:
+        dict: A dictionary with keys as (sessionId) and values as the number of inflection points for that session.
+    """
+    
+    validate_any_not_none(df, traces)
+
+    if traces is None:
+        validate_dataframe(df)
+        traces = extract_traces_by_session(df)
+
+    inflections_per_session = {}
+    for session_id, session_traces in traces.items():
+        inflections = []
+        for trace in session_traces:
+            trace = compute_space_time_diff(trace)
+            directions = np.arctan2(trace[ColumnNames.DY], trace[ColumnNames.DX])
+            distance = trace[ColumnNames.DISTANCE]
+            curvature = np.diff(directions) / distance[1:].values  # Curvature is change in direction over change in distance
+            inflection_points = np.sum(np.diff(np.sign(curvature)) != 0)  # Count inflection points where curvature changes sign
+            inflections.append(inflection_points)
+        inflections_per_session[session_id] = np.sum(inflections)
+    
+    return inflections_per_session
+
+
+def straigthness(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None) -> dict:
+    """
+    Calculate the straightness of the trajectory in the given DataFrame.
+    Straightness is calculated as the ratio of the distance between the start and end points (ideal) to the total path length.
+    Parameters:
+        df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
+        traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
+    Returns:
+        dict: A dictionary with keys as (sessionId) and values as the straightness for that session.
+    """
+    
+    validate_any_not_none(df, traces)
+
+    if traces is None:
+        validate_dataframe(df)
+        traces = extract_traces_by_session(df)
+
+    straightness_per_session = {}
+    for session_id, session_traces in traces.items():
+        straightness_values = []
+        for trace in session_traces:
+            trace = compute_space_time_diff(trace)
+            trace = path(trace).get(session_id)[0] # TODO fix?
+            start_point = np.array([trace[ColumnNames.X].iloc[0], trace[ColumnNames.Y].iloc[0]])
+            end_point = np.array([trace[ColumnNames.X].iloc[-1], trace[ColumnNames.Y].iloc[-1]])
+            ideal_distance = np.linalg.norm(end_point - start_point)
+            path_length = trace[ColumnNames.DISTANCE].sum()
+            straightness = ideal_distance / path_length if path_length > 0 else 0
+            straightness_values.append(straightness)
+        straightness_per_session[session_id] = np.mean(straightness_values) if straightness_values else 0
+
+    return straightness_per_session
+
+def jitter(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None) -> dict:
+    """
+    Calculate the jitter of the trajectory in the given DataFrame.
+    Jitter is calculated as the smoothed to real path length ratio.
+    Parameters:
+        df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
+        traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
+    Returns:
+        dict: A dictionary with keys as (sessionId) and values as the jitter for that session.
+    """
+    
+    validate_any_not_none(df, traces)
+
+    if traces is None:
+        validate_dataframe(df)
+        traces = extract_traces_by_session(df)
+
+    raise NotImplementedError("Jitter is not implemented yet.")
