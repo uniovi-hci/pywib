@@ -18,7 +18,7 @@ from pybtex.style.template import (
 project = 'pywib'
 copyright = '2025, Guillermo Dylan Carvajal Aza, Alejandro Álvarez Varela'
 author = 'Guillermo Dylan Carvajal Aza, Alejandro Álvarez Varela'
-release = '1.1.0'
+release = '1.1.2'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

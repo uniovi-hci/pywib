@@ -10,7 +10,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 setup(
     name='pywib',
     packages=find_packages(),
-    version='1.1.0',
+    version='1.1.2',
     description='HCI Web Interaction Analyzer - A library for analyzing web user interactions',
     long_description=long_description,
     long_description_content_type="text/markdown",

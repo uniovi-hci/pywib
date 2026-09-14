@@ -1,3 +1,3 @@
-eventTypes,timeStamps,xxy,yyyy,keyValueEvents,keyCodeEvents,sessionIds
+eventTypes,timeStamps,xxy,yyyy,keyValue,keyCode,sessionIds
 100,1750792680000,-1,-1,-1,-1,SESSION_A
 200,1750792686000,-1,-1,-1,-1,SESSION_A

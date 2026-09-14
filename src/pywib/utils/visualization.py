@@ -125,6 +125,11 @@ def video_from_trace(df, user_id, outfile: str, width=640, height=480, fps=30, c
     print(f"Video generated for user {user_id}: {outfile}")
 
 def keyboard_heatmap(df, session_id=None):
+    """
+    Generates a heatmap visualizing the frequency of key presses for a given session or for all sessions in the DataFrame.
+    The type of keyboard represented is a standard QWERTY layout (ANSI), and the heatmap shows the frequency of key presses for each key.
+    To change the keyboard layout, you can modify the 'layout' variable in the function.
+    """
 
     validate_dataframe_keyboard(df)
 
@@ -138,28 +143,29 @@ def keyboard_heatmap(df, session_id=None):
     df = df.copy()
 
     # Drop null / invalid ascii
-    df = df[df[ColumnNames.KEY_CODE_EVENT].notna()]
+    df = df[df[ColumnNames.KEY_VALUE].notna()]
 
     if df.empty:
         # TODO warn?
         return
 
     # Convert ASCII integer → character
-    df["char"] = df[ColumnNames.KEY_CODE_EVENT].astype(int).apply(chr)
+    df["char"] = df[ColumnNames.KEY_VALUE]
 
     # Normalize to lowercase (so A and a merge)
     df["char"] = df["char"].apply(str.lower)
 
     key_counts = df["char"].value_counts()
 
-    # ---- FULL STANDARD QWERTY LAYOUT (ANSI) ----
     layout = [
-        ["`", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "="],
-        ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]"],
-        ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'"],
-        ["z", "x", "c", "v", "b", "n", "m", ",", ".", "/"],
-        ["space"]
-    ]
+            ["escape", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12"],
+            ["`", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "backspace"],
+            ["tab", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\"],
+            ["capslock", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "enter"],
+            ["shift", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/", "shift"],
+            ["control", "meta", "alt", "space", "altgraph", "arrowleft", "arrowup", "arrowdown", "arrowright"]
+        ]
+    
 
     # Determine max width for consistent matrix
     max_cols = max(len(row) for row in layout)
@@ -175,7 +181,7 @@ def keyboard_heatmap(df, session_id=None):
         for key in row:
             if key == "space":
                 count = key_counts.get(" ", 0)
-                label = "Space"
+                label = "space"
             else:
                 count = key_counts.get(key, 0)
                 label = key.upper()
@@ -204,7 +210,7 @@ def keyboard_heatmap(df, session_id=None):
         cbar=True
     )
     
-    plt.title("Keyboard Usage Heatmap (ASCII / keyCodeEvent)")
+    plt.title("Keyboard Usage Heatmap (ASCII / keyCode)")
     plt.xticks([])
     plt.yticks([])
     plt.show()

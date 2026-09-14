@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pywib"
-version = "1.1.0"
+version = "1.1.2"
 authors = [
   { name="Guillermo Dylan Carvajal Aza", email="carvajalguillermo@uniovi.es" },
   { name="Alejandro Álvarez Varela", email="avarela@uniovi.es"}
@@ -14,9 +14,11 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "pandas>=1.3.0",
-    "numpy>=1.21.0",
-    "matplotlib>=3.5.0",
-    "opencv-python>=4.5"
+    "numpy>=1.26.4",
+    "matplotlib>=3.4.0",
+    "opencv-python>=4.12.0.88",
+    "seaborn>=0.13.2",
+    "joblib>=1.5.3"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

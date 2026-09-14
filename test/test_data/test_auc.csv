@@ -1,4 +1,4 @@
-eventType,timeStamp,x,y,keyValueEvent,keyCodeEvent,sessionId
+eventType,timeStamp,x,y,keyValue,keyCode,sessionId
 100,1750792657300,-1,-1,-1,-1,SESSION_A
 100,1750792657300,-1,-1,-1,-1,SESSION_B
 0,1750792657400,0,0,-1,-1,SESSION_A
