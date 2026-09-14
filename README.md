@@ -1,4 +1,4 @@
-# pywib
+# PyWIB
 
 Pywib (Python Web Interaction Behaviour) is a library desgined for analysing and obtaning metrics from users interaction with web pages.
 
@@ -10,7 +10,7 @@ v_metrics = velocity_metrics(None, v)
 ```
 
 ## Running the tests
-First, navigate to the pywib folder
+First, navigate to the PyWIB folder
 ```bash
 cd pywib
 ```

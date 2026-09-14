@@ -4,7 +4,7 @@ from collections import defaultdict
 
 def import_pyModule():
     """
-    Necessary to import the pywib package when running tests directly from the test/ folder.
+    Necessary to import the PyWIB package when running tests directly from the test/ folder.
     """
     import sys
     import os
@@ -68,3 +68,39 @@ def assert_between_zero_inf(self, data, column):
         self.assertIn(column, data)
         self.assertGreaterEqual(data[column], 0)
         self.assertLessEqual(data[column], np.inf)
+
+def build_trajectory_df(xs, ys, session_id='SESSION_TEST', t_start=0, t_step=100):
+    """
+    Build a minimal valid DataFrame from bare (x, y) coordinate lists.
+
+    Timestamps are auto-generated as t_start, t_start+t_step, t_start+2*t_step, …
+    so callers only need to supply the geometry. The resulting DataFrame has all
+    columns required by pywib trajectory methods.
+
+    Args:
+        xs (list[float]):  X coordinates.
+        ys (list[float]):  Y coordinates (must be the same length as xs).
+        session_id (str):  Session identifier assigned to every row.
+        t_start (int):     Value of the first timestamp in milliseconds.
+        t_step  (int):     Milliseconds between consecutive timestamps.
+
+    Returns:
+        pd.DataFrame: Ready-to-use DataFrame.
+
+    Example — two collinear sessions concatenated:
+        df_a = build_trajectory_df([0, 100, 200], [0, 0, 0], session_id='SESSION_A')
+        df_b = build_trajectory_df([0, 100, 200], [0, 0, 0], session_id='SESSION_B')
+        df   = pd.concat([df_a, df_b], ignore_index=True)
+    """
+    n = len(xs)
+    assert len(ys) == n, "xs and ys must have the same length"
+    timestamps = [t_start + i * t_step for i in range(n)]
+    return pd.DataFrame({
+        'eventType':     [0] * n,
+        'timeStamp':     timestamps,
+        'x':             list(xs),
+        'y':             list(ys),
+        'keyValue': [-1] * n,
+        'keyCode':  [-1] * n,
+        'sessionId':     [session_id] * n,
+    })

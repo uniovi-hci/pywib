@@ -19,8 +19,14 @@ class EventTypes:
     """Event type for mouse wheel events, specificaly for wheel clicks."""
     EVENT_CONTEXT_MENU = 6
     """Event type for context menu events."""
-    EVENT_ON_TOUCH_MOVE = 7
+    EVENT_ON_POINTER_MOVE = 7
     """Event type for touch move events, specific for mobile and tablet devices."""
+    EVENT_POINTER_DOWN = 8
+    """Event type for pointer down events."""
+    EVENT_POINTER_UP = 9
+    """Event type for pointer up events."""
+    EVENT_POINTER_CANCEL = 10
+    """Event type for pointer cancel events."""
     EVENT_WINDOW_SCROLL = 11
     """Event type for window scroll events."""
     EVENT_WINDOW_RESIZE = 12

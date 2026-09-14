@@ -73,14 +73,14 @@ def extract_keystroke_traces_by_session(df: pd.DataFrame) -> dict[str, list[pd.D
 def extract_mouse_click_traces_by_session(dt: pd.DataFrame) -> dict:
     """
     
-    Extracts those traces with event movements that end with ON_MOUSE_CLICK or ON_TOUCH_TAP events,
+    Extracts those traces with event movements that end with ON_MOUSE_CLICK or ON_POINTER_MOVE events,
     grouped by sessionId.
     """
     validate_dataframe(dt)
     dt = dt.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
     click_traces_by_session = {}
     for session_id, group in dt.groupby(ColumnNames.SESSION_ID):
-        is_move = (group[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_ON_MOUSE_MOVE) | (group[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_ON_TOUCH_MOVE)
+        is_move = (group[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_ON_MOUSE_MOVE) | (group[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_ON_POINTER_MOVE)
         group_id = (~is_move).cumsum()
         click_traces = []
         for _, sub_group in group[is_move].groupby(group_id[is_move]):
@@ -103,7 +103,7 @@ def extract_mouse_click_traces_by_session_with_intial_pause(dt: pd.DataFrame, pa
     dt = dt.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
     click_traces_by_session = {}
     for session_id, group in dt.groupby(ColumnNames.SESSION_ID):
-        is_move = (group[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_ON_MOUSE_MOVE) | (group[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_ON_TOUCH_MOVE)
+        is_move = (group[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_ON_MOUSE_MOVE) | (group[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_ON_POINTER_MOVE)
         group_id = (~is_move).cumsum()
         click_traces = []
         for _, sub_group in group[is_move].groupby(group_id[is_move]):
@@ -135,7 +135,7 @@ def _extract_move_trace(dt: pd.DataFrame) -> list[pd.DataFrame]:
     """
     is_move = dt[ColumnNames.EVENT_TYPE].isin([
         EventTypes.EVENT_ON_MOUSE_MOVE,
-        EventTypes.EVENT_ON_TOUCH_MOVE
+        EventTypes.EVENT_ON_POINTER_MOVE
     ])
 
     return _extract_consecutive_traces(

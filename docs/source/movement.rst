@@ -29,6 +29,7 @@ The function :py:func:`~pywib.velocity_metrics` computes velocity metrics such a
 
 Acceleration
 ------------
+
 The acceleration is the rate of change of velocity with respect to time, which provides insights into how quickly users change their speed during interactions :cite:p:`Kieslich2019-mt,Katerina2018-ch`.
 
 The function :py:func:`~pywib.acceleration` computes the acceleration based on the change in velocity over time from a DataFrame or session traces.
@@ -38,7 +39,7 @@ The acceleration is calculated as:
 .. |vi| replace:: :math:`v_i`
 .. math::
 
-   a_i = \frac{v_{i} - v_{i-1}}{t_{i} - t_{i-1}}
+   a_i = \frac{v_{i} - v_{i+1}}{t_{i} - t_{i+1}}
 
 where \(|vi|\) is the velocity at point \(|i|\) and \(|ti|\) is the timestamp of point \(|i|\).
 
@@ -54,7 +55,7 @@ The jerkiness is calculated as the change in acceleration per unit time:
 .. |ai| replace:: :math:`a_i`
 .. math::
 
-   j_i = \frac{a_{i} - a_{i-1}}{t_{i} - t_{i-1}}
+   j_i = \frac{a_{i} - a_{i+1}}{t_{i} - t_{i+1}}
 
 where \(|ai|\) is the acceleration at point \(|i|\) and \(|ti|\) is the timestamp of point \(|i|\).
 

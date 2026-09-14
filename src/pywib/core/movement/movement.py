@@ -4,7 +4,7 @@ from pywib.utils import (acceleration_traces, velocity_traces, velocity_df,
                          acceleration_df, jerkiness_df, jerkiness_traces, 
                          validate_dataframe, compute_metrics_from_traces, extract_traces_by_session)
 from pywib.constants import ColumnNames
-from pywib.utils.movement import velocity_traces_parallel
+from pywib.utils.movement.movement import velocity_traces_parallel
 from pywib.utils.validation import validate_any_not_none
 
 def _traces_missing_column(traces: dict[str, list[pd.DataFrame]] | None, column_name: str) -> bool:

@@ -1,194 +1,94 @@
-import pandas as pd
+
 import numpy as np
+from numpy.ma import angle
+import pandas as pd
+
 from pywib.constants import ColumnNames
-from pywib.utils import compute_space_time_diff, validate_dataframe
-from pywib.utils.utils import deprecated
-from joblib import Parallel, delayed
-
-def velocity_df(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Calculate velocity for a single DataFrame.
-
-    Parameters:
-        df (pd.DataFrame): DataFrame containing 'x', 'y', and 'timeStamp' columns.
-
-    Returns:
-        pd.DataFrame: DataFrame with an additional 'velocity' column.
-    """
-    validate_dataframe(df)
-    df = _path(df)  # Compute distance and dt first
-    # Avoid division by zero if dt is 0
-    df[ColumnNames.VELOCITY] = np.where(df[ColumnNames.DT] != 0, 
-                                        df[ColumnNames.DISTANCE] / df[ColumnNames.DT], 
-                                        0)
-    return df
+from pywib.utils.utils import compute_space_time_diff, deprecated
+from pywib.utils.validation import validate_dataframe
 
 
-def velocity_traces(traces: dict[str, list[pd.DataFrame]]) -> dict[str, list[pd.DataFrame]]:
-    """
-    Calculate velocity for a dictionary of traces (each a list of DataFrames).
+def _compute_angles(df: pd.DataFrame) -> pd.DataFrame:
+    x_coordinates = pd.to_numeric(df[ColumnNames.X], errors="coerce").to_numpy(dtype=float)
+    y_coordinates = pd.to_numeric(df[ColumnNames.Y], errors="coerce").to_numpy(dtype=float)
+    df[ColumnNames.ANGLE] = np.nan
+    angle_column = df.columns.get_loc(ColumnNames.ANGLE)
 
-    Parameters:
-        traces (dict[str, list[pd.DataFrame]]): Mapping of sessionId to list of DataFrames.
-
-    Returns:
-        dict[str, list[pd.DataFrame]]: Same structure, but with velocity computed in each DataFrame.
-    """
-    for session_id, session_traces in traces.items():
-        for i, df in enumerate(session_traces):
-            validate_dataframe(df)
-            session_traces[i] = velocity_df(df)
-        traces[session_id] = session_traces
-    return traces
-
-def velocity_traces_parallel(traces: dict[str, list[pd.DataFrame]], n_jobs: int = 2) -> dict[str, list[pd.DataFrame]]:
-    """
-    Calculate velocity for a dictionary of traces (each a list of DataFrames) in parallel.
-
-    Parameters:
-        traces (dict[str, list[pd.DataFrame]]): Mapping of sessionId to list of DataFrames.
-        n_jobs (int): Number of parallel jobs.
-
-    Returns:
-        dict[str, list[pd.DataFrame]]: Same structure, but with velocity computed in each DataFrame.
-    """
-
-    def compute_velocity_for_trace(df):
-        validate_dataframe(df)
-        return velocity_df(df)
-
-    for session_id, session_traces in traces.items():
-        session_traces = Parallel(n_jobs=n_jobs)(
-            delayed(compute_velocity_for_trace)(df) for df in session_traces
+    for i in range(1, len(df) - 1):
+        first_vector = np.array([
+            y_coordinates[i] - y_coordinates[i - 1],
+            x_coordinates[i] - x_coordinates[i - 1],
+        ])
+        second_vector = np.array([
+            y_coordinates[i + 1] - y_coordinates[i],
+            x_coordinates[i + 1] - x_coordinates[i],
+        ])
+        first_norm = np.linalg.norm(first_vector)
+        second_norm = np.linalg.norm(second_vector)
+        if not np.isfinite(first_norm) or not np.isfinite(second_norm) or first_norm == 0 or second_norm == 0:
+            continue
+        df.iloc[i, angle_column] = np.arccos(
+            np.clip(np.dot(first_vector, second_vector) / (first_norm * second_norm), -1.0, 1.0)
         )
-        traces[session_id] = session_traces
-    return traces
 
-def acceleration_df(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Calculate acceleration for a single DataFrame.
-
-    Parameters:
-        df (pd.DataFrame): DataFrame containing 'x', 'y', and 'timeStamp' columns.
-
-    Returns:
-        pd.DataFrame: DataFrame with an additional 'acceleration' column.
-    """
-    validate_dataframe(df)
-
-    if(ColumnNames.VELOCITY not in df.columns):
-        df = velocity_df(df)
-
-    # Avoid division by zero if dt is 0
-    df[ColumnNames.ACCELERATION] = np.where(df[ColumnNames.DT] != 0, 
-                                            df[ColumnNames.VELOCITY].diff().fillna(0) / df[ColumnNames.DT], 
-                                            0)
     return df
 
 
-def acceleration_traces(traces: dict[str, list[pd.DataFrame]]) -> dict[str, list[pd.DataFrame]]:
-    """
-    Calculate acceleration for a dictionary of traces (each a list of DataFrames).
-
-    Parameters:
-        traces (dict[str, list[pd.DataFrame]]): Mapping of sessionId to list of DataFrames.
-
-    Returns:
-        dict[str, list[pd.DataFrame]]: Same structure, but with acceleration computed in each DataFrame.
-    """
+def _apply_metric_to_traces(traces: dict, metric) -> dict:
     for session_id, session_traces in traces.items():
-        for i, df in enumerate(session_traces):
-            validate_dataframe(df)
-            session_traces[i] = acceleration_df(df)
+        for index, trace in enumerate(session_traces):
+            session_traces[index] = metric(trace)
         traces[session_id] = session_traces
     return traces
 
-def jerkiness_df(df: pd.DataFrame) -> pd.DataFrame:
+def angular_acceleration_df(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Calculate jerkiness for a single DataFrame.
-
+    Compute the angular acceleration for a given DataFrame.
+    Angular acceleration is calculated as the change in angular velocity over time.
+    
     Parameters:
-        df (pd.DataFrame): DataFrame containing 'x', 'y', and 'timeStamp' columns.
-
+        df (pd.DataFrame): DataFrame containing 'timeStamp' and 'angular_velocity' columns.
+    
     Returns:
-        pd.DataFrame: DataFrame with an additional 'jerkiness' column.
+        pd.DataFrame: DataFrame with an additional 'angular_acceleration' column representing the angular acceleration.
     """
     validate_dataframe(df)
+    
+    if ColumnNames.ANGULAR_VELOCITY not in df.columns:
+        df = angular_velocity_df(df)
 
-    if(ColumnNames.ACCELERATION not in df.columns):
-        df = acceleration_df(df)
+    if ColumnNames.DT not in df.columns:
+        df = compute_space_time_diff(df)
 
-    # Avoid division by zero if dt is 0
-    df[ColumnNames.JERKINESS] = np.where(df[ColumnNames.DT] != 0, 
-                                         df[ColumnNames.ACCELERATION].diff().fillna(0) / df[ColumnNames.DT], 
-                                         0)
+    df[ColumnNames.ANGULAR_ACCELERATION] = np.where(
+        df[ColumnNames.DT] != 0,
+        df[ColumnNames.ANGULAR_VELOCITY].diff().fillna(0) / df[ColumnNames.DT],
+        0,
+    )
     return df
 
-
-def jerkiness_traces(traces: dict[str, list[pd.DataFrame]]) -> dict[str, list[pd.DataFrame]]:
+def angular_velocity_df(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Calculate jerkiness for a dictionary of traces (each a list of DataFrames).
-
+    Compute the angular velocity for a given DataFrame.
+    Angular velocity is calculated as the change in angle over time.
+    
     Parameters:
-        traces (dict[str, list[pd.DataFrame]]): Mapping of sessionId to list of DataFrames.
-
+        df (pd.DataFrame): DataFrame containing 'timeStamp' and 'angle' columns.
+    
     Returns:
-        dict[str, list[pd.DataFrame]]: Same structure, but with jerkiness computed in each DataFrame.
+        pd.DataFrame: DataFrame with an additional 'angular_velocity' column representing the angular velocity.
     """
-    for session_id, session_traces in traces.items():
-        for i, df in enumerate(session_traces):
-            validate_dataframe(df)
-            session_traces[i] = jerkiness_df(df)
-        traces[session_id] = session_traces
-    return traces
+    validate_dataframe(df)
+    
+    if(ColumnNames.DT not in df.columns):
+        df = compute_space_time_diff(df)
 
-@deprecated
-def jerkiness(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None) -> dict[str, list[pd.DataFrame]]:
-    """
-    Compute jerkiness for either a single DataFrame or multiple traces.
+    if ColumnNames.ANGLE not in df.columns:
+        df = angle(df)
 
-    If `traces` is not provided, they are extracted from `df` using `extract_traces_by_session()`.
-
-    Parameters
-    ----------
-    df : pd.DataFrame, optional
-        DataFrame containing 'acceleration' and 'dt' columns.
-    traces : dict[str, list[pd.DataFrame]], optional
-        Dictionary mapping session IDs to lists of DataFrames.
-
-    Returns
-    -------
-    dict[str, list[pd.DataFrame]]
-        Dictionary of traces, each containing the computed 'jerkiness' column.
-    """
-    if traces is None:
-        if df is None:
-            raise ValueError("Either 'df' or 'traces' must be provided.")
-        validate_dataframe(df)
-        traces = extract_traces_by_session(df)
-    return jerkiness_traces(traces)
-
-def _path(trace: pd.DataFrame) -> pd.DataFrame:
-    """
-    Helper function to calculate the path length for a single trace.
-    This function computes the path length based on the Euclidean distance between consecutive points.
-
-    Parameters:
-        trace (pd.DataFrame): A single trace DataFrame.
-
-    Returns:
-        pd.DataFrame: DataFrame with an additional 'distance' column representing the path length.
-    """
-
-    if trace is None:
-        raise ValueError("Trace DataFrame must be provided.")
-
-    validate_dataframe(trace)
-
-    trace = compute_space_time_diff(trace)
-    trace[ColumnNames.DISTANCE] = np.sqrt(trace[ColumnNames.DX] ** 2 + trace[ColumnNames.DY] ** 2)
-
-    return trace
+    df[ColumnNames.ANGLE] = df[ColumnNames.ANGLE].fillna(0)
+    df[ColumnNames.ANGULAR_VELOCITY] = np.where(df[ColumnNames.DT] != 0, df[ColumnNames.ANGLE] / df[ColumnNames.DT], 0)
+    return df
 
 @deprecated
 def _auc(df: pd.DataFrame) -> float:

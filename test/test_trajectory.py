@@ -1,13 +1,16 @@
+import math
 import unittest
 import sys
 import os
+import pandas as pd
 
 import numpy as np
 sys.path.insert(0, os.path.dirname(__file__))
-from utils import assert_between_zero_inf, process_csv, import_pyModule
+from utils import assert_between_zero_inf, process_csv, import_pyModule, build_trajectory_df
 
 import_pyModule()
-from pywib import (ColumnNames, extract_traces_by_session, auc, x_flips, y_flips, deviations, straigthness, visualize_trace)
+from pywib import (ColumnNames, extract_traces_by_session, auc, x_flips, y_flips, deviations, 
+straigthness, visualize_trace, angle, angular_velocity, angular_acceleration)
 
 # Cambiar a True solo al probar en desarrollo
 DEBUG = True
@@ -139,17 +142,108 @@ class TestTrajectory(unittest.TestCase):
         self.assertGreaterEqual(flips.get("SESSION_B"), 0)
         self.assertEqual(flips.get("SESSION_B"), 6)
 
-    def test_deviations(self):
+    def test_deviations_greaterThanZero(self):
+        """
+        Deviation values (aad, mad_mean/max/min) must always be positive.
+        """
         dev = deviations(self.test_data_flips.copy())
-        trace = self.test_data_flips.loc[self.test_data_flips["sessionId"] == "SESSION_A"]
-        visualize_trace(trace, trace.index, "SESSION_A")
-        self.assertGreaterEqual(dev.get("SESSION_A"), 0)
+        for element in dev.get("SESSION_A"):
+            self.assertGreaterEqual(dev.get("SESSION_A").get(element), 0)
 
     def test_straigthness(self):
-
         straigthness_val = straigthness(self.test_data_flips_single.copy())
         self.assertGreaterEqual(straigthness_val.get("SESSION_A"), 0)
 
+    def test_angle_perTraces_inRange(self):
+        """ 
+            The values for the angle must always be between 0 <= n <= pi.
+        """
+        angles = angle(self.test_data_flips, per_traces=True)
+        for trace in angles.get("SESSION_A"):
+            for index, value in enumerate(trace[ColumnNames.ANGLE]):
+                if index == 0 or index == len(trace) - 1:
+                    continue;
+                else:
+                    self.assertGreaterEqual(value, 0, "Values for angle must be >= 0")
+                    self.assertTrue(value <= math.pi, "Values for angle must be <= pi")
+
+    def test_angle_perTraces_collinearSameDirection(self):
+        """
+        Collinear points in the same direction → angle = 0 everywhere (interior points).
+        """
+        df = build_trajectory_df([0, 100, 200], [0, 0, 0], session_id='SESSION_A')
+        traces = angle(df)
+        for session_id, session_traces in traces.items():
+            for trace in session_traces:
+                print(trace)
+                interior = trace[ColumnNames.ANGLE].dropna()
+                for theta in interior:
+                    self.assertAlmostEqual(theta, 0, places=10,
+                        msg=f"[{session_id}] Collinear same-direction must give angle 0, got {theta}")
+
+    def test_angle_perTraces_collinearWithAngle(self):
+        """
+        Collinear points in the same direction that form an angle.
+        """
+        df = build_trajectory_df([0, 100, 200, 100, 100], [0, 0, 100, 200, 300], session_id='SESSION_A')
+
+        traces = angle(df)
+        for session_id, session_traces in traces.items():
+            for trace in session_traces:
+                interior = trace[ColumnNames.ANGLE].dropna()
+                for i in range(1, len(interior) - 2):
+                    theta = interior[i]
+                    match i:
+                        case 1:
+                            self.assertAlmostEqual(theta, math.pi/4, places=10,
+                                msg=f"[{session_id}] Angle must give angle 45º, got {theta}")
+                        case 2:
+                            self.assertAlmostEqual(theta, math.pi/2, places=10,
+                                msg=f"[{session_id}] Angle must give angle 90º, got {theta}")
+                        case 3:
+                            self.assertAlmostEqual(theta, math.pi + math.pi, places=10,
+                                msg=f"[{session_id}] Angle must give angle 135º, got {theta}")
+
+    def test_angle_perTraces_collinearOppositeDirection(self):
+        """
+        Collinear points in the same direction that form an angle.
+        """
+        df = build_trajectory_df([0, 100, 0], [0, 0, 0], session_id='SESSION_A')
+
+        traces = angle(df)
+        for session_id, session_traces in traces.items():
+            for trace in session_traces:
+                print(trace)
+                interior = trace[ColumnNames.ANGLE].dropna()
+                for theta in interior:
+                    self.assertAlmostEqual(theta, math.pi, places=10,
+                        msg=f"[{session_id}] Collinear opposite-direction must give angle 180º, got {theta}")
+
+
+    def test_angular_velocity_perTraces_inRange(self):
+        """ 
+            The values for the angular velocity must always be  0 <= n.
+        """
+        ang_vel = angular_velocity(self.test_data_flips, per_traces=True)
+        for _, traces in ang_vel.items():
+            for trace in traces:
+                for value in trace[ColumnNames.ANGULAR_VELOCITY]:
+                    self.assertGreaterEqual(value, 0, "Values for angular velocity must be >= 0")
+
+    def test_angular_acceleration_perTraces(self):
+        """
+            The calues for angular acceleration must always be bewween -pi <= n <= pi
+        """
+        ang_acc = angular_acceleration(self.test_data_flips, per_traces=True)
+        for _, traces in ang_acc.items():
+                for trace in traces:
+                    expected = trace[ColumnNames.ANGULAR_VELOCITY].diff().fillna(0) / trace[ColumnNames.DT]
+                    expected = expected.where(trace[ColumnNames.DT] != 0, 0)
+
+                    np.testing.assert_allclose(
+                        trace[ColumnNames.ANGULAR_ACCELERATION],
+                        expected,
+                    )
 
 if __name__ == '__main__':
     unittest.main()
