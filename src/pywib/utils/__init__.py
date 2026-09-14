@@ -33,7 +33,6 @@ __all__ = [
     'angular_velocity_df',
     'angular_acceleration_df',
     '_apply_metric_to_traces',
-    '_compute_angles',
     'flips'
 
 ]

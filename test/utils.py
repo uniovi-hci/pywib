@@ -100,7 +100,7 @@ def build_trajectory_df(xs, ys, session_id='SESSION_TEST', t_start=0, t_step=100
         'timeStamp':     timestamps,
         'x':             list(xs),
         'y':             list(ys),
-        'keyValueEvent': [-1] * n,
-        'keyCodeEvent':  [-1] * n,
+        'keyValue': [-1] * n,
+        'keyCode':  [-1] * n,
         'sessionId':     [session_id] * n,
     })
