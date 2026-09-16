@@ -79,7 +79,10 @@ class FullTraceVisualization(TraceVisualizationStrategy):
 
 class StandardizedTraceVisualization(TraceVisualizationStrategy):
     """
-    Standardized visualization strategy:
+    Standardized visualization strategy. 
+    It expects extra parameters:
+    TODO
+    ...
     1. Centroid translation to center.
     2. Scaling to comparable lengths.
     """

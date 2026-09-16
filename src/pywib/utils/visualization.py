@@ -7,7 +7,7 @@ from pywib.constants import EventTypes
 from pywib.constants import ColumnNames
 from pywib.utils.validation import validate_dataframe_keyboard
 
-def visualize_trace(df, stroke_indices, stroke_id, plot_name: str = None, plot: bool = True, show_info: bool = False, show_optimal_line: bool = False):
+def visualize_trace(df, stroke_indices, stroke_id, plot_name: str = None, plot: bool = True, show_info: bool = False, show_optimal_line: bool = False, outfile: str = None):
     """
     Generates (and optionally saves) a plot visualizing the trace of a stroke.
 
@@ -17,8 +17,9 @@ def visualize_trace(df, stroke_indices, stroke_id, plot_name: str = None, plot: 
         stroke_id (str): Identifier for the stroke to be displayed in the title.
         plot_name (str, optional): If provided, saves the plot to this file path.
         plot (bool): Whether to display the plot.
+        outfile (str): Path to save the output image file, if None it does not save it.
     """
-    stroke_data = df.loc[stroke_indices]
+    stroke_data = df.loc[stroke_indices].sort_values(ColumnNames.TIME_STAMP)
     plt.figure(figsize=(10, 8))
     plt.plot(stroke_data[ColumnNames.X], stroke_data[ColumnNames.Y], 'b-o', linewidth=2, markersize=4, label='Real trace')
 
@@ -45,6 +46,9 @@ def visualize_trace(df, stroke_indices, stroke_id, plot_name: str = None, plot: 
 
     if plot_name:
         plt.savefig(plot_name, bbox_inches='tight', dpi=300)
+
+    if outfile is not None:
+        plt.savefig(outfile)
 
     if plot:
         plt.show()
