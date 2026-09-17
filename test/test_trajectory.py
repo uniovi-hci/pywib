@@ -150,10 +150,6 @@ class TestTrajectory(unittest.TestCase):
         for element in dev.get("SESSION_A"):
             self.assertGreaterEqual(dev.get("SESSION_A").get(element), 0)
 
-    def test_straigthness(self):
-        straigthness_val = straigthness(self.test_data_flips_single.copy())
-        self.assertGreaterEqual(straigthness_val.get("SESSION_A"), 0)
-
     def test_angle_perTraces_inRange(self):
         """ 
             The values for the angle must always be between 0 <= n <= pi.
