@@ -24,6 +24,11 @@ def visualize_trace(df, stroke_indices, stroke_id, type: str = "simple", plot_na
         **kwargs: Additional arguments to pass to the visualization strategy.
     """
     stroke_data = df.loc[stroke_indices]
+
+    # Remove events with 'x' and 'y' equal to -1
+    stroke_data = stroke_data[(stroke_data[ColumnNames.X] != -1) & (stroke_data[ColumnNames.Y] != -1)]
+
+    stroke_data = stroke_data[stroke_data[ColumnNames.EVENT_TYPE] != EventTypes.EVENT_POINTER_CANCEL]
     
     # We pass kwargs to get_visualization_strategy which forwards them to the strategy constructor
     # For standardized, this means we can pass image_size and target_scale

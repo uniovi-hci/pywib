@@ -10,7 +10,7 @@ from pywib.utils.movement import (auc_df, auc_traces, flips, _apply_metric_to_tr
 from pywib.utils.utils import deprecated
 from pywib.utils.validation import validate_any_not_none
 
-def path(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None) -> pd.DataFrame:
+def path(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces:bool = True) -> pd.DataFrame | dict[str, list[pd.DataFrame]]:
     """
     Calculate the path length for the given DataFrame.
     This function computes the path length based on the Euclidean distance between consecutive points.
@@ -20,10 +20,15 @@ def path(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None) 
         traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
 
     Returns:
-        pd.DataFrame: DataFrame with an additional 'distance' column representing the path length.
+        pd.DataFrame: If not per traces, returns the DataFrame with the "distance" column
+        dict[str, list[pd.DataFrame]]: If per traces, returns a dictionary with keys as (sessionId) and values as lists of DataFrames with the "distance" column
     """
     
     validate_any_not_none(df, traces)
+
+    if not per_traces:
+        validate_dataframe(df)
+        return _path(df)
 
     if traces is None:
         validate_dataframe(df)
