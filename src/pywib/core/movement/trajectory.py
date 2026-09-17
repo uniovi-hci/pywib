@@ -236,6 +236,14 @@ def angle(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None,
 def angular_velocity(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces: bool = True) -> pd.DataFrame | dict:
     """
     Angular velocity computed as the change in angle over time.
+
+    Parameters:
+        df (pd.DataFrame): DataFrame containing required columns.
+        traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
+        per_traces (bool): Whether to compute the angular velocity for each trace in the DataFrame. If False, the angular velocity will be computed directly on the DataFrame.
+    Returns:
+        dict: A dictionary with keys as (sessionId) and values as lists of DataFrames with the 'angular_velocity' column.
+        df: pd.DataFrame: If not per traces, returns the DataFrame with the 'angular_velocity' column.
     """
     validate_any_not_none(df, traces)
     
@@ -263,6 +271,14 @@ def angular_velocity(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFram
 def angular_acceleration(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces: bool = True) -> pd.DataFrame | dict:
     """
     Angular acceleration computed as the change in angular velocity over time.
+
+    Parameters:
+        df (pd.DataFrame): DataFrame containing required columns.
+        traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
+        per_traces (bool): Whether to compute the angular acceleration for each trace in the DataFrame. If False, the angular acceleration will be computed directly on the DataFrame.
+    Returns:
+        dict: A dictionary with keys as (sessionId) and values as lists of DataFrames with the 'angular_acceleration' column.
+        df: pd.DataFrame: If not per traces, returns the DataFrame with the 'angular_acceleration' column.
     """
     # TODO per traces
     validate_any_not_none(df, traces)
@@ -288,6 +304,7 @@ def angular_acceleration(df: pd.DataFrame = None, traces: dict[str, list[pd.Data
 def direction_changes(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces: bool = False) -> pd.DataFrame | dict:
     """
         Calculate the number of direction changes in the given DataFrame.
+        
         Parameters:
             df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
             traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
@@ -328,15 +345,17 @@ def x_flips(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = Non
     """
     Calculate the number of x-direction flips in the given DataFrame.
     
-    **Metric Context Specificity**: If performed by trace, it will sum the flips of all traces in a session. 
-    A session that has a flip between the end of a trace and the beginning of the next one will **not** be counted as a flip as computations are done trace by trace, so if you want to consider those flips, you should compute them on the whole dataframe or consider the traces as a single one.
+    .. note::
+        **Metric Context Specificity**: If performed by trace, it will sum the flips of all traces in a session. 
+        A session that has a flip between the end of a trace and the beginning of the next one will **not** be counted as a flip as computations are done trace by trace, so if you want to consider those flips, you should compute them on the whole dataframe or consider the traces as a single one.
+    
     Parameters:
         df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
         traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
         threshold (float): The threshold for considering a flip.
         per_traces (bool): Whether to return the result for each trace separately. If False, returns the total count as an integer.
     Returns:
-    int | dict: The number of x-direction flips or a dictionary with the count for each session.
+        int | dict: The number of x-direction flips or a dictionary with the count for each session.
     """
     validate_any_not_none(df, traces)
 
@@ -364,8 +383,10 @@ def y_flips(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = Non
     """
     Calculate the number of y-direction flips in the given DataFrame.
 
-    **Metric Context Specificity**: If performed by trace, it will sum the flips of all traces in a session. 
-    A session that has a flip between the end of a trace and the beginning of the next one will **not** be counted as a flip as computations are done trace by trace, so if you want to consider those flips, you should compute them on the whole dataframe or consider the traces as a single one.
+    .. note::
+        **Metric Context Specificity**: If performed by trace, it will sum the flips of all traces in a session. 
+        A session that has a flip between the end of a trace and the beginning of the next one will **not** be counted as a flip as computations are done trace by trace, so if you want to consider those flips, you should compute them on the whole dataframe or consider the traces as a single one.
+    
     Parameters:
         df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
         traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
@@ -461,6 +482,7 @@ def inflections(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] =
 
 def straigthness(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None) -> dict:
     """
+    Not yet implemented.
     Calculate the straightness of the trajectory in the given DataFrame.
     Straightness is calculated as the ratio of the distance between the start and end points (ideal) to the total path length.
     Parameters:
@@ -490,10 +512,12 @@ def straigthness(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] 
             straightness_values.append(straightness)
         straightness_per_session[session_id] = np.mean(straightness_values) if straightness_values else 0
 
-    return straightness_per_session
+    # return straightness_per_session
+    return NotImplementedError("Straightness is not implemented yet.")
 
 def jitter(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None) -> dict:
     """
+    Not yet implemented.
     Calculate the jitter of the trajectory in the given DataFrame.
     Jitter is calculated as the smoothed to real path length ratio.
     Parameters:

@@ -1,5 +1,5 @@
 Keystroke Metrics
-================
+=================
 
 .. currentmodule:: pywib
 

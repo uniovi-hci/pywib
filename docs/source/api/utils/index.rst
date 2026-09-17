@@ -7,3 +7,4 @@ This section documents additional utility functions provided by the `PyWIB` libr
    :maxdepth: 1
 
    visualization
+   data_processing
