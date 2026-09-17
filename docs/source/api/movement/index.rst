@@ -7,3 +7,4 @@ Movement Functions
    velocity
    acceleration
    jerkiness
+   angle

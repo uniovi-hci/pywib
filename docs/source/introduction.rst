@@ -10,9 +10,9 @@ It provides tools to compute various interaction related metrics (like velocity,
 Rationale
 =============
 The analyisis of mouse interaction has been widely used in HCI to infer in several aspects of the users interaction with the system.
-This mouse dynamics have been proven useful for analysing bheavioral patterns :cite:p:`Katerina2018-ch,Cepeda2018-kn`, 
+This mouse dynamics have been proven useful for analysing bheavioral patterns :cite:p:`Katerina2018-ch,Cepeda2018-km`, 
 cognitive and physicial conditions affecting the user :cite:p:`Seelye2015-yx, Khan2008-is, Rhim2023-uz` 
-or even for user identification :cite:p:`Karim2020-ss` and authentication :cite:p:`Monrose-2000-oc`.
+or even for user identification :cite:p:`Karim2020-ss` and authentication :cite:p:`Monrose2000-oc`.
 
 One could enumerate hundreads of research works in this field that have analyzed mouse interaction data to extract meaningful insights about user behavior.
 However, there is a lack of dedicated tools and libraries to facilitate this analysis, which is a gap that **PyWIB** aims to address.

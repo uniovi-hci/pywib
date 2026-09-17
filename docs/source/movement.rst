@@ -61,7 +61,50 @@ where \(|ai|\) is the acceleration at point \(|i|\) and \(|ti|\) is the timestam
 
 The function :py:func:`~pywib.jerkiness_metrics` computes jerkiness metrics such as mean, max, and min jerkiness for each session.
 
+Angle
+-----
+
+The angle metric measures the turning angle formed by three consecutive points in a trajectory. The function :py:func:`~pywib.angle` computes this angle from the vectors defined by neighboring points around the middle point.
+
+If the trajectory contains points :math:`p_{i-1}, p_i, p_{i+1}` with vectors
+
+.. math::
+
+   u = p_i - p_{i-1}, \qquad v = p_{i+1} - p_i
+
+then the turning angle is the angle between :math:`u` and :math:`v`. This provides a local measure of curvature and directional change between consecutive segments.
+
+When called on a DataFrame, the function can return the angle series directly or, when traces are provided, it can compute the angle for each trace separately and return the results grouped by session.
+
+Angular Velocity
+----------------
+
+The function :py:func:`~pywib.angular_velocity` computes the change in angular position over time. In other words, it estimates the rate at which the trajectory turns as the user moves.
+
+If the angle values are denoted by :math:`\theta_i` and the timestamps by :math:`t_i`, the angular velocity is computed as:
+
+.. math::
+
+   \omega_i = \frac{\theta_i - \theta_{i-1}}{t_i - t_{i-1}}
+
+The implementation automatically derives the required angle and time-difference columns when they are missing, and it can operate either on the whole DataFrame or on each trace in a session.
+
+Angular Acceleration
+--------------------
+
+The function :py:func:`~pywib.angular_acceleration` computes the change in angular velocity over time. This metric captures how quickly the turning rate itself changes during the movement.
+
+If the angular velocity is denoted by :math:`\omega_i`, then angular acceleration is:
+
+.. math::
+
+   \alpha_i = \frac{\omega_i - \omega_{i-1}}{t_i - t_{i-1}}
+
+As with angular velocity, the implementation can work directly on a DataFrame or over session traces, and it will compute any intermediate columns needed before estimating the acceleration.
+
 References
 ----------
 .. bibliography::
    :style: apa
+
+

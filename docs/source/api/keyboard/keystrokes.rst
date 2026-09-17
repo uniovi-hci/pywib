@@ -11,6 +11,7 @@ Typing Speed
 -------------
 
 .. autofunction:: pywib.typing_speed
+
 Practical Example
 ~~~~~~~~~~~~~~~~~
 .. code-block:: python
@@ -30,6 +31,20 @@ CPM stands for Characters Per Minute, and it is calculated by taking the total n
 The method can be either run with either :python:`per_traces=True` or :python:`per_traces=False`, the first one segments the data by groups of keystroke events, while the second one computes the speed for the entire DataFrame without pauses into consideration.
 
 This is important to consider for the specific given dataset, if the data contains anything else than keystroke data, then :python:`per_traces=True` should be used to avoid incorrect CPM calculations. Whereas a dataset of consecutive keystroke events can be processed with per_traces=False to obtain a single CPM.
+
+Typing Durations
+-----------------
+.. autofunction:: pywib.typing_durations
+
+Practical Example
+~~~~~~~~~~~~~~~~~
+.. code-block:: python
+
+   from pywib import typing_durations
+   
+   durations = typing_durations(data_frame)
+   for duration in durations:
+       print(f"Typing Duration: {duration} seconds")
 
 Backspace Usage
 -----------------
