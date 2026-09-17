@@ -1,0 +1,518 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Mouse Metrics" href="mouse.html"><link rel="prev" title="Movement Metrics" href="movement.html">
+
+    <link rel="shortcut icon" href="_static/favicon.ico"><!-- Generated with Sphinx 8.1.3 and Furo 2025.12.19 -->
+        <title>Trajectory Metrics - pywib 2.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=5ae546fa" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">pywib 2.0.0 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <span class="sidebar-brand-text">pywib 2.0.0 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#rationale">Rationale</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movement.html">Movement Metrics</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Trajectory Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mouse.html">Mouse Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keyboard.html">Keystroke Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timing.html">Timing Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Constants</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/index.html">API Documentation</a><input aria-label="Toggle navigation of API Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/movement/index.html">Movement Functions</a><input aria-label="Toggle navigation of Movement Functions" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/velocity.html">Velocity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/velocity.html#velocity-metrics">Velocity Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/acceleration.html">Acceleration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/acceleration.html#acceleration-metrics">Acceleration Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/jerkiness.html">Jerkiness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/jerkiness.html#jerkiness-metrics">Jerkiness Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/angle.html">Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/angle.html#angular-velocity">Angular Velocity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/angle.html#angular-acceleration">Angular Acceleration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/mouse/clicks.html">Clicks</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/trajectory/index.html">Trajectory Functions</a><input aria-label="Toggle navigation of Trajectory Functions" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/trajectory/path.html">Distance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/trajectory/auc.html">Area Under the Curve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/trajectory/deviations.html">Deviations from trajectory</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/keyboard/index.html">Keystroke Functions</a><input aria-label="Toggle navigation of Keystroke Functions" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/keyboard/keystrokes.html">Keystorke Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/timing/index.html">Timing Functions</a><input aria-label="Toggle navigation of Timing Functions" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/timing/pauses.html">Pauses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/timing/time.html">Timing</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/utils/index.html">Other utility Functions</a><input aria-label="Toggle navigation of Other utility Functions" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/utils/visualization.html">Visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/utils/data_processing.html">Data Processing Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="segmentation.html">Segmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/trajectory.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="trajectory-metrics">
+<h1>Trajectory Metrics<a class="headerlink" href="#trajectory-metrics" title="Link to this heading">¶</a></h1>
+<p>This section covers various trajectory metrics used to analyze the users trajectory, such as path length or AUC, which provide insights into movement efficiency and accuracy during user interactions in a mathematically rigorous manner.</p>
+<section id="path">
+<h2>Path<a class="headerlink" href="#path" title="Link to this heading">¶</a></h2>
+<p>The path or total distance traveled during user interactions is a key metric for analyzing movement efficiency <span class="bibtex-citation" id="id1">[<a class="reference internal" href="#id7" title="Tzafilkou Katerina and Protogeros Nicolaos. Mouse behavioral patterns and keystroke dynamics in End-User development: what can they tell us about users' behavioral attributes? Comput. Human Behav., 83:288–305, June 2018. URL: https://doi.org/10.1016/j.chb.2018.02.012.">Katerina and Nicolaos, 2018</a>, <a class="reference internal" href="#id12" title="Adriana Seelye, Stuart Hagler, Nora Mattek, Diane B Howieson, Katherine Wild, Hiroko H Dodge, and Jeffrey A Kaye. Computer mouse movement patterns: a potential marker of mild cognitive impairment. Alzheimers Dement. (Amst.), 1(4):472–480, December 2015. URL: https://alz-journals.onlinelibrary.wiley.com/doi/10.1016/j.dadm.2015.09.006.">Seelye <em>et al.</em>, 2015</a>, <a class="reference internal" href="#id10" title="Jungwook Rhim, Jiwon Kim, and Gahgene Gweon. Using geometric features of drag-and-drop trajectories to understand students' learning. In Proceedings of the 2023 CHI Conference on Human Factors in Computing Systems, volume 19, 1–14. New York, NY, USA, April 2023. ACM. URL: https://dl.acm.org/doi/10.1145/3544548.3581143.">Rhim <em>et al.</em>, 2023</a>, <a class="reference internal" href="#id9" title="Pascal J. Kieslich, Felix Henninger, Dirk U. Wulff, Jonas M. B. Haslbeck, and Michael Schulte-Mecklenbeck. Mouse-tracking: a practical guide to implementation and analysis. In A Handbook of Process Tracing Methods, pages 20. Routledge, 2nd edition edition, 2019. URL: https://www.taylorfrancis.com/chapters/edit/10.4324/9781315160559-9/mouse-tracking-pascal-kieslich-felix-henninger-dirk-wulff-jonas-haslbeck-michael-schulte-mecklenbeck.">Kieslich <em>et al.</em>, 2019</a>]</span>.</p>
+<p>The function <a class="reference internal" href="api/trajectory/path.html#pywib.path" title="pywib.path"><code class="xref py py-func docutils literal notranslate"><span class="pre">path()</span></code></a> calculates the path length for interaction points from a DataFrame or session traces.
+This function computes the path length based on the Euclidean distance between consecutive points.</p>
+<p>The distance between consecutive points is calculated as:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[d_i = \sqrt{(x_{i} - x_{i-1})^2 + (y_{i} - y_{i-1})^2}\]</div>
+</div>
+</section>
+<section id="auc">
+<h2>AUC<a class="headerlink" href="#auc" title="Link to this heading">¶</a></h2>
+<p>The Area Under the Curve (AUC) quantifies the overall movement efficiency during user interactions in computers <span class="bibtex-citation" id="id2">[<a class="reference internal" href="#id7" title="Tzafilkou Katerina and Protogeros Nicolaos. Mouse behavioral patterns and keystroke dynamics in End-User development: what can they tell us about users' behavioral attributes? Comput. Human Behav., 83:288–305, June 2018. URL: https://doi.org/10.1016/j.chb.2018.02.012.">Katerina and Nicolaos, 2018</a>, <a class="reference internal" href="#id9" title="Pascal J. Kieslich, Felix Henninger, Dirk U. Wulff, Jonas M. B. Haslbeck, and Michael Schulte-Mecklenbeck. Mouse-tracking: a practical guide to implementation and analysis. In A Handbook of Process Tracing Methods, pages 20. Routledge, 2nd edition edition, 2019. URL: https://www.taylorfrancis.com/chapters/edit/10.4324/9781315160559-9/mouse-tracking-pascal-kieslich-felix-henninger-dirk-wulff-jonas-haslbeck-michael-schulte-mecklenbeck.">Kieslich <em>et al.</em>, 2019</a>]</span> or even in mobile devices <span class="bibtex-citation" id="id3">[<a class="reference internal" href="#id10" title="Jungwook Rhim, Jiwon Kim, and Gahgene Gweon. Using geometric features of drag-and-drop trajectories to understand students' learning. In Proceedings of the 2023 CHI Conference on Human Factors in Computing Systems, volume 19, 1–14. New York, NY, USA, April 2023. ACM. URL: https://dl.acm.org/doi/10.1145/3544548.3581143.">Rhim <em>et al.</em>, 2023</a>]</span>.</p>
+<p>The function <a class="reference internal" href="api/trajectory/auc.html#pywib.auc" title="pywib.auc"><code class="xref py py-func docutils literal notranslate"><span class="pre">auc()</span></code></a> computes the AUC for a DataFrame or session traces. The current implementation returns a tuple of geometric AUC and execution AUC when operating on a single DataFrame, and a dictionary keyed by session containing lists of those two values when operating trace-wise.</p>
+<p>In other words, for each trajectory segment it evaluates the area under the curve considering both the geometric path and the execution-time profile of the movement. This allows one to compare the actual trajectory geometry against the temporal execution of the interaction.</p>
+<p>Metrics such as mean, maximum, and minimum AUC values can still be summarized afterward from the per-session outputs when needed.</p>
+</section>
+<section id="maximum-absolute-deviation">
+<h2>Maximum Absolute Deviation<a class="headerlink" href="#maximum-absolute-deviation" title="Link to this heading">¶</a></h2>
+<p>The Maximum Absolute Deviation (MAD) is a metric that quantifies the maximum deviation of the actual movement path from the optimal straight-line path during user interactions <span class="bibtex-citation" id="id4">[<a class="reference internal" href="#id7" title="Tzafilkou Katerina and Protogeros Nicolaos. Mouse behavioral patterns and keystroke dynamics in End-User development: what can they tell us about users' behavioral attributes? Comput. Human Behav., 83:288–305, June 2018. URL: https://doi.org/10.1016/j.chb.2018.02.012.">Katerina and Nicolaos, 2018</a>, <a class="reference internal" href="#id10" title="Jungwook Rhim, Jiwon Kim, and Gahgene Gweon. Using geometric features of drag-and-drop trajectories to understand students' learning. In Proceedings of the 2023 CHI Conference on Human Factors in Computing Systems, volume 19, 1–14. New York, NY, USA, April 2023. ACM. URL: https://dl.acm.org/doi/10.1145/3544548.3581143.">Rhim <em>et al.</em>, 2023</a>, <a class="reference internal" href="#id9" title="Pascal J. Kieslich, Felix Henninger, Dirk U. Wulff, Jonas M. B. Haslbeck, and Michael Schulte-Mecklenbeck. Mouse-tracking: a practical guide to implementation and analysis. In A Handbook of Process Tracing Methods, pages 20. Routledge, 2nd edition edition, 2019. URL: https://www.taylorfrancis.com/chapters/edit/10.4324/9781315160559-9/mouse-tracking-pascal-kieslich-felix-henninger-dirk-wulff-jonas-haslbeck-michael-schulte-mecklenbeck.">Kieslich <em>et al.</em>, 2019</a>]</span>.</p>
+<p>The function <a class="reference internal" href="api/trajectory/deviations.html#pywib.deviations" title="pywib.deviations"><code class="xref py py-func docutils literal notranslate"><span class="pre">deviations()</span></code></a> calculates the MAD for each session or interaction trace, returning both the mean, maximum and minimum MAD values.</p>
+<p>The MAD is calculated as the maximum perpendicular distance from any point on the actual path to the straight line connecting the start and end points of the movement.</p>
+<figure class="align-center" id="id26">
+<img alt="Diagram illustrating Maximum Absolute Deviation (MAD)" src="_images/mad_diagram.svg" />
+<figcaption>
+<p><span class="caption-text">Diagram illustrating Maximum Absolute Deviation (MAD)</span><a class="headerlink" href="#id26" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="average-absolute-deviation">
+<h2>Average Absolute Deviation<a class="headerlink" href="#average-absolute-deviation" title="Link to this heading">¶</a></h2>
+<p>The Average Absolute Deviation (AAD) is a metric that quantifies the average deviation of the actual movement path from the optimal straight-line path during user interactions <span class="bibtex-citation" id="id5">[<a class="reference internal" href="#id10" title="Jungwook Rhim, Jiwon Kim, and Gahgene Gweon. Using geometric features of drag-and-drop trajectories to understand students' learning. In Proceedings of the 2023 CHI Conference on Human Factors in Computing Systems, volume 19, 1–14. New York, NY, USA, April 2023. ACM. URL: https://dl.acm.org/doi/10.1145/3544548.3581143.">Rhim <em>et al.</em>, 2023</a>]</span>.</p>
+<p>It consists of the average value of the perpendicular distances from each point of the trajectory to the straight line connecting the start and end points of the movement (optimal trajectory).</p>
+<p>The function <a class="reference internal" href="api/trajectory/deviations.html#pywib.deviations" title="pywib.deviations"><code class="xref py py-func docutils literal notranslate"><span class="pre">deviations()</span></code></a> calculates the AAD for each session or interaction trace, returning the AAD value along with MAD metrics.</p>
+<figure class="align-center" id="id27">
+<img alt="Diagram illustrating Average Absolute Deviation (AAD)" src="_images/aad_diagram.svg" />
+<figcaption>
+<p><span class="caption-text">Diagram illustrating Average Absolute Deviation (AAD)</span><a class="headerlink" href="#id27" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="direction-changes">
+<h2>Direction Changes<a class="headerlink" href="#direction-changes" title="Link to this heading">¶</a></h2>
+<p>The number of direction changes is a metric that quantifies how often the movement direction reverses or shifts substantially during a trajectory.</p>
+<p>The function <a class="reference internal" href="api/trajectory/deviations.html#pywib.direction_changes" title="pywib.direction_changes"><code class="xref py py-func docutils literal notranslate"><span class="pre">direction_changes()</span></code></a> computes the direction of each displacement vector from <span class="math notranslate nohighlight">\(\Delta x\)</span> and <span class="math notranslate nohighlight">\(\Delta y\)</span>, then evaluates the angular difference between consecutive steps. A direction change is counted when the absolute angular difference exceeds 45 degrees, i.e., more than <span class="math notranslate nohighlight">\(\pi / 4\)</span> radians.</p>
+<p>This metric is directly related to its submetrics <a class="reference internal" href="api/trajectory/deviations.html#pywib.x_flips" title="pywib.x_flips"><code class="xref py py-func docutils literal notranslate"><span class="pre">x_flips()</span></code></a> and <a class="reference internal" href="api/trajectory/deviations.html#pywib.y_flips" title="pywib.y_flips"><code class="xref py py-func docutils literal notranslate"><span class="pre">y_flips()</span></code></a>, which count directional reversals along the x-axis and y-axis, respectively.</p>
+</section>
+<section id="x-direction-flips">
+<h2>X-direction Flips<a class="headerlink" href="#x-direction-flips" title="Link to this heading">¶</a></h2>
+<p>The function <a class="reference internal" href="api/trajectory/deviations.html#pywib.x_flips" title="pywib.x_flips"><code class="xref py py-func docutils literal notranslate"><span class="pre">x_flips()</span></code></a> counts how many times the x-component of movement changes sign beyond a given threshold. In the implementation, the threshold is set by default to 0.1, and the metric is computed from the displacement along the x-axis, <span class="math notranslate nohighlight">\(\Delta x\)</span>.</p>
+<p>This captures horizontal reversals in movement, such as when the cursor starts moving left after having moved right, or vice versa.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Context specificity: when computed on traces, the function sums the flips across all traces in each session. A flip occurring between the end of one trace and the beginning of the next one is not counted, because the computation is performed trace by trace. To include those transitions, compute the metric on the full dataframe or combine the traces into a single movement sequence.</p>
+</div>
+</section>
+<section id="y-direction-flips">
+<h2>Y-direction Flips<a class="headerlink" href="#y-direction-flips" title="Link to this heading">¶</a></h2>
+<p>The function <a class="reference internal" href="api/trajectory/deviations.html#pywib.y_flips" title="pywib.y_flips"><code class="xref py py-func docutils literal notranslate"><span class="pre">y_flips()</span></code></a> follows the same logic as <a class="reference internal" href="api/trajectory/deviations.html#pywib.x_flips" title="pywib.x_flips"><code class="xref py py-func docutils literal notranslate"><span class="pre">x_flips()</span></code></a>, but applied to the y-component of movement, <span class="math notranslate nohighlight">\(\Delta y\)</span>.</p>
+<p>It counts the number of times the vertical direction changes sign beyond the configured threshold, which is useful for detecting upward and downward reversals in the trajectory.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Context specificity: when computed on traces, the function sums the flips across all traces in each session. A flip occurring between the end of one trace and the beginning of the next one is not counted, because the computation is performed trace by trace. To include those transitions, compute the metric on the full dataframe or integrate the traces into a single trajectory.</p>
+</div>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div class="docutils container" id="id6">
+<div role="list" class="citation-list">
+<div class="citation" id="id7" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id4">3</a>)</span>
+<p>Tzafilkou Katerina and Protogeros Nicolaos. Mouse behavioral patterns and keystroke dynamics in End-User development: what can they tell us about users' behavioral attributes? <em>Comput. Human Behav.</em>, 83:288–305, June 2018. URL: <a class="reference external" href="https://doi.org/10.1016/j.chb.2018.02.012">https://doi.org/10.1016/j.chb.2018.02.012</a>.</p>
+</div>
+<div class="citation" id="id8" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p>Catia Cepeda, Joao Rodrigues, Maria Camila Dias, Diogo Oliveira, Dina Rindlisbacher, Marcus Cheetham, and Hugo Gamboa. Mouse tracking measures and movement patterns with application for online surveys. In <em>Lecture Notes in Computer Science</em>, Lecture notes in computer science, pages 28–42. Springer International Publishing, Cham, 2018. URL: <a class="reference external" href="https://dl.acm.org/doi/10.1007/978-3-319-99740-7_3">https://dl.acm.org/doi/10.1007/978-3-319-99740-7_3</a>.</p>
+</div>
+<div class="citation" id="id12" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">3</a><span class="fn-bracket">]</span></span>
+<p>Adriana Seelye, Stuart Hagler, Nora Mattek, Diane B Howieson, Katherine Wild, Hiroko H Dodge, and Jeffrey A Kaye. Computer mouse movement patterns: a potential marker of mild cognitive impairment. <em>Alzheimers Dement. (Amst.)</em>, 1(4):472–480, December 2015. URL: <a class="reference external" href="https://alz-journals.onlinelibrary.wiley.com/doi/10.1016/j.dadm.2015.09.006">https://alz-journals.onlinelibrary.wiley.com/doi/10.1016/j.dadm.2015.09.006</a>.</p>
+</div>
+<div class="citation" id="id18" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></span>
+<p>Iftikhar Ahmed Khan, Willem-Paul Brinkman, Nick Fine, and Robert M Hierons. Measuring personality from keyboard and mouse use. In <em>Proceedings of the 15th European conference on Cognitive ergonomics: the ergonomics of cool interaction</em>. New York, NY, USA, January 2008. ACM.</p>
+</div>
+<div class="citation" id="id10" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id3">2</a>,<a role="doc-backlink" href="#id4">3</a>,<a role="doc-backlink" href="#id5">4</a>)</span>
+<p>Jungwook Rhim, Jiwon Kim, and Gahgene Gweon. Using geometric features of drag-and-drop trajectories to understand students' learning. In <em>Proceedings of the 2023 CHI Conference on Human Factors in Computing Systems</em>, volume 19, 1–14. New York, NY, USA, April 2023. ACM. URL: <a class="reference external" href="https://dl.acm.org/doi/10.1145/3544548.3581143">https://dl.acm.org/doi/10.1145/3544548.3581143</a>.</p>
+</div>
+<div class="citation" id="id24" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></span>
+<p>Masud Karim and Md Hasanuzzaman. A study on mouse movement features to identify user. <em>Sci. Res. J.</em>, 08(04):77–82, April 2020.</p>
+</div>
+<div class="citation" id="id14" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></span>
+<p>Fabian Monrose and Aviel D Rubin. Keystroke dynamics as a biometric for authentication. <em>Future Gener. Comput. Syst.</em>, 16(4):351–359, February 2000.</p>
+</div>
+<div class="citation" id="id22" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></span>
+<p>Dirk U Wulff, Pascal J Kieslich, Felix Henninger, Jonas M B Haslbeck, and Michael Schulte-Mecklenbeck. Movement tracking of psychological processes: a tutorial using mousetrap. <em>Behav. Res. Methods</em>, 57(11):307, October 2025.</p>
+</div>
+<div class="citation" id="id23" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>9<span class="fn-bracket">]</span></span>
+<p>Martin Schoemann, Malte Lüken, Tobias Grage, Pascal J Kieslich, and Stefan Scherbaum. Validating mouse-tracking: how design factors influence action dynamics in intertemporal decision making. <em>Behav. Res. Methods</em>, 51(5):2356–2377, October 2019.</p>
+</div>
+<div class="citation" id="id21" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>10<span class="fn-bracket">]</span></span>
+<p>Eduard Kuric, Peter Demcak, Matus Krajcovic, and Peter Nemcek. Is mouse dynamics information credible for user behavior research? an empirical investigation. <em>Comput. Stand. Interfaces</em>, 90(103849):103849, August 2024.</p>
+</div>
+<div class="citation" id="id25" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>11<span class="fn-bracket">]</span></span>
+<p>Guillermo Dylan Carvajal-Aza, Alejandro Alvarez-Varela, Javier De Andres, Martin Gonzalez-Rodriguez, Daniel Fernandez-Lanvin, and Mercedes Paino. Pywib: a python library for a multi-modal approach to web interaction behavior analysis. In <em>Proceedings of the 2026 IARIA Annual Congress on Frontiers in Science, Technology, Services, and Applications (IARIA Congress 2026)</em>, 103–108. Nice, France, 2026. IARIA Press. URL: <a class="reference external" href="https://www.thinkmind.org/library/IARIA_CONGRESS/IARIA_Congress_2026/iaria_congress_2026_1_170_50103.html">https://www.thinkmind.org/library/IARIA_CONGRESS/IARIA_Congress_2026/iaria_congress_2026_1_170_50103.html</a>.</p>
+</div>
+<div class="citation" id="id9" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>12<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id4">3</a>)</span>
+<p>Pascal J. Kieslich, Felix Henninger, Dirk U. Wulff, Jonas M. B. Haslbeck, and Michael Schulte-Mecklenbeck. Mouse-tracking: a practical guide to implementation and analysis. In <em>A Handbook of Process Tracing Methods</em>, pages 20. Routledge, 2nd edition edition, 2019. URL: <a class="reference external" href="https://www.taylorfrancis.com/chapters/edit/10.4324/9781315160559-9/mouse-tracking-pascal-kieslich-felix-henninger-dirk-wulff-jonas-haslbeck-michael-schulte-mecklenbeck">https://www.taylorfrancis.com/chapters/edit/10.4324/9781315160559-9/mouse-tracking-pascal-kieslich-felix-henninger-dirk-wulff-jonas-haslbeck-michael-schulte-mecklenbeck</a>.</p>
+</div>
+<div class="citation" id="id11" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>13<span class="fn-bracket">]</span></span>
+<p>Christian O'Reilly and Réjean Plamondon. Can computer mice be used as low-cost devices for the acquisition of planar human movement velocity signals? <em>Behav. Res. Methods</em>, 43(1):229–238, March 2011. URL: <a class="reference external" href="https://link.springer.com/article/10.3758/s13428-010-0030-3#notes">https://link.springer.com/article/10.3758/s13428-010-0030-3#notes</a>.</p>
+</div>
+<div class="citation" id="id13" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>14<span class="fn-bracket">]</span></span>
+<p>Beatriz Pariente-Martinez, Martin Gonzalez-Rodriguez, Daniel Fernandez-Lanvin, and Javier De Andres-Suarez. Measuring the role of age in user performance during interaction with computers. <em>Univers. Access Inf. Soc.</em>, 15(2):237–247, June 2016. URL: <a class="reference external" href="https://link.springer.com/article/10.1007/s10209-014-0388-6">https://link.springer.com/article/10.1007/s10209-014-0388-6</a>.</p>
+</div>
+<div class="citation" id="id15" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>15<span class="fn-bracket">]</span></span>
+<p>Clayton Epp, Michael Lippold, and Regan L Mandryk. Identifying emotional states using keystroke dynamics. In <em>Proceedings of the SIGCHI Conference on Human Factors in Computing Systems</em>. New York, NY, USA, May 2011. ACM.</p>
+</div>
+<div class="citation" id="id16" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>16<span class="fn-bracket">]</span></span>
+<p>Preeti Khanna and M Sasikumar. Recognising emotions from keyboard stroke pattern. <em>Int. J. Comput. Appl.</em>, 11(9):1–5, December 2010.</p>
+</div>
+<div class="citation" id="id19" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>17<span class="fn-bracket">]</span></span>
+<p>Lisa M Vizer, Lina Zhou, and Andrew Sears. Automated stress detection using keystroke and linguistic features: an exploratory study. <em>Int. J. Hum. Comput. Stud.</em>, 67(10):870–886, October 2009.</p>
+</div>
+<div class="citation" id="id17" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>18<span class="fn-bracket">]</span></span>
+<p>A F M Nazmul Haque Nahin, Jawad Mohammad Alam, Hasan Mahmud, and Kamrul Hasan. Identifying emotion by keystroke dynamics and text pattern analysis. <em>Behav. Inf. Technol.</em>, 33(9):987–996, September 2014.</p>
+</div>
+<div class="citation" id="id20" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>19<span class="fn-bracket">]</span></span>
+<p>Maarten Dijkstra. <em>The diagnosis of self-efficacy using mouse and keyboard input</em>. PhD thesis, Utrecht University, 2013.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="mouse.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Mouse Metrics</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="movement.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Movement Metrics</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Guillermo Dylan Carvajal Aza, Alejandro Álvarez Varela
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Trajectory Metrics</a><ul>
+<li><a class="reference internal" href="#path">Path</a></li>
+<li><a class="reference internal" href="#auc">AUC</a></li>
+<li><a class="reference internal" href="#maximum-absolute-deviation">Maximum Absolute Deviation</a></li>
+<li><a class="reference internal" href="#average-absolute-deviation">Average Absolute Deviation</a></li>
+<li><a class="reference internal" href="#direction-changes">Direction Changes</a></li>
+<li><a class="reference internal" href="#x-direction-flips">X-direction Flips</a></li>
+<li><a class="reference internal" href="#y-direction-flips">Y-direction Flips</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=51b770b3"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>

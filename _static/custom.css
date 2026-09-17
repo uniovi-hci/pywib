@@ -1,0 +1,18 @@
+/* Título principal (h1) */
+div.body h1 {
+    font-size: 2.5em;   /* aumenta el tamaño */
+}
+
+/* Títulos de sección (h2) */
+div.body h2 {
+    font-size: 2em;
+}
+
+/* Títulos de subsección (h3) */
+div.body h3 {
+    font-size: 1.5em;
+}
+
+div.body h4 {
+    font-size: 1.2em;
+}
