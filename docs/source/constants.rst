@@ -6,28 +6,23 @@ Event Types
 
 Mapped JavaScript event types to more manageable elements for analysis.
 
-.. autoclass:: pywib.constants.EventTypes
+.. autoclass:: pywib.EventTypes
    :members:
    :undoc-members:
-   :no-index:
-   :member-order: bysource
-
-Component Types
----------------
-
-.. autoclass:: pywib.constants.ComponentTypes
-   :members:
-   :undoc-members:
-   :no-index:
    :member-order: bysource
 
 DataFrame Columns
 ------------------
 
-.. autoclass:: pywib.constants.ColumnNames
+.. autoclass:: pywib.ColumnNames
    :members:
    :undoc-members:
-   :no-index:
    :member-order: bysource
 
-  
+Component Types
+---------------
+
+.. autoclass:: pywib.ComponentTypes
+   :members:
+   :undoc-members:
+   :member-order: bysource

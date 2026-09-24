@@ -17,14 +17,15 @@ Contents
    :maxdepth: 2
 
    introduction
+   constants
+   data_structures
    movement
    trajectory
    mouse
    keyboard
    timing
-   constants
-   api/index
    segmentation
    visualization
+   api/index
 
 This library has been developed by the `HCI research group <https://www.hci.uniovi.es/>`_ from the University of Oviedo and is maintained on `GitHub <https://github.com/HumanCommunicationInteraction/pywib>`_.

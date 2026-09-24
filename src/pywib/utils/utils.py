@@ -111,7 +111,7 @@ def deprecated(func: Callable[pT, rT]) -> Callable[pT, rT]:
         return func(*args, **kwargs)
     return new_func
 
-def to_pywib_df(df: pd.DataFrame, colSessionId: str, colX: str, colY: str, colTimeStamp: str, colKeyValue: str = None, colKeyCode: str = None) -> pd.DataFrame:
+def to_pywib_df(df: pd.DataFrame, colSessionId: str, colX: str, colY: str, colTimeStamp: str, colEventType: str, colKeyValue: str = None, colKeyCode: str = None) -> pd.DataFrame:
     """
     Convert a DataFrame to the standard PyWib format.
 
@@ -121,6 +121,7 @@ def to_pywib_df(df: pd.DataFrame, colSessionId: str, colX: str, colY: str, colTi
         colX (str): Name of the column representing the X coordinate.
         colY (str): Name of the column representing the Y coordinate.
         colTimeStamp (str): Name of the column representing the timestamp.
+        colEventType (str): Name of the column representing the event type.
         colKeyValue (str | None): Name of the column representing the key value.
         colKeyCode (str | None): Name of the column representing the key code.
 
@@ -140,5 +141,6 @@ def to_pywib_df(df: pd.DataFrame, colSessionId: str, colX: str, colY: str, colTi
         colX: ColumnNames.X,
         colY: ColumnNames.Y,
         colTimeStamp: ColumnNames.TIME_STAMP,
-        colSessionId: ColumnNames.SESSION_ID
+        colSessionId: ColumnNames.SESSION_ID,
+        colEventType: ColumnNames.EVENT_TYPE
     })
