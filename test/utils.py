@@ -42,12 +42,14 @@ def process_csv(file_path):
             row['y'],
             row['keyValue'],
             row['keyCode'],
+            row['screenWidth'],
+            row['screenHeight']
         ])
     
     all_sessions = []
     for (session_id), matrix in matrices.items():
         df = pd.DataFrame(matrix, columns=[
-            'eventType', 'timeStamp', 'x', 'y', 'keyValue', 'keyCode' ])
+            'eventType', 'timeStamp', 'x', 'y', 'keyValue', 'keyCode', 'screenWidth', 'screenHeight' ])
         df['sessionId'] = session_id
         all_sessions.append(df)
 
