@@ -35,37 +35,38 @@ def process_csv(file_path):
         # Create a key combining sessionId and sceneId
         key = (session_id)
         
+        array = []
         if has_screen_dimensions:
-            matrices[key].append([
-                        row['eventType'],
-                        row['timeStamp'],
-                        row['x'],
-                        row['y'],
-                        row['keyValue'],
-                        row['keyCode'],
-                        row['screenWidth'],
-                        row['screenHeight'],
-                    ])
-        else:
-            matrices[key].append([
-                        row['eventType'],
-                        row['timeStamp'],
-                        row['x'],
-                        row['y'],
-                        row['keyValue'],
-                        row['keyCode'],
-                            ])
+            array.append(row['screenWidth'])
+            array.append(row['screenHeight'])
+        
+        if "keyCode" in df.columns:
+            array.append(row['keyCode'])
+        if "keyValue" in df.columns:
+            array.append(row['keyValue'])
+        
+        array.append(row['eventType'])
+        array.append(row['timeStamp'])
+        array.append(row['x'])
+        array.append(row['y'])
+        matrices[key].append(array)
 
     
     all_sessions = []
     for (session_id), matrix in matrices.items():
+        cols = []
         if has_screen_dimensions:
-             df = pd.DataFrame(matrix, columns=[
-                 'eventType', 'timeStamp', 'x', 'y', 'keyValue', 'keyCode',
-                 'screenWidth', 'screenHeight'])
-        else:
-            df = pd.DataFrame(matrix, columns=[
-                        'eventType', 'timeStamp', 'x', 'y', 'keyValue', 'keyCode'])
+             cols.append('screenWidth')
+             cols.append('screenHeight')
+        if "keyCode" in df.columns:
+             cols.append('keyCode')
+        if "keyValue" in df.columns:
+             cols.append('keyValue')
+        cols.append('eventType')
+        cols.append('timeStamp')
+        cols.append('x')
+        cols.append('y')
+        df = pd.DataFrame(matrix, columns=cols)
         df['sessionId'] = session_id
         all_sessions.append(df)
 

@@ -15,8 +15,10 @@ DEBUG = True
 class TestData:
     if(DEBUG):
         dataFile = 'test/test_data/test_window_resize_error.csv'
+        dataFile2 = 'test/test_data/test_window_resize_multiple_error.csv'
     else:
-        dataFile = 'pywib/test/test_data/test_mouse_keyboard.csv'
+        dataFile = 'pywib/test/test_data/test_window_resize_error.csv'
+        dataFile2 = 'pywib/test/test_data/test_window_resize_multiple_error.csv'
 
 class TestKeyboard(unittest.TestCase):
     
@@ -24,11 +26,12 @@ class TestKeyboard(unittest.TestCase):
         """Set up test data"""
         # Create sample test data instead of relying on external CSV
         self.test_data = process_csv(TestData.dataFile)
+        self.test_data_2 = process_csv(TestData.dataFile2)
         
     def test_typing_speed(self):
-        data = normalize_coordinates_for_zoom(self.test_data[self.test_data["sessionId"] == "SESSION_A"], "chrome")
+        data = normalize_coordinates_for_zoom(self.test_data_2, "chrome")
         print(data.columns)
-        print(data[["x", "y", "x_normalized", "y_normalized", "zoom_classification", "cumulative_scale"]])
+        print(data["zoom_classification"].unique())
         print("Data printed")
         self.assertTrue(False)
 
