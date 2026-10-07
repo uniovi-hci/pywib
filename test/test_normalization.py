@@ -7,7 +7,8 @@ from utils import process_csv, import_pyModule
 
 import_pyModule()
 
-from pywib.utils.normalization import normalize_coordinates_for_zoom, normalize_coordinates_for_screen_size
+from pywib.utils.normalization import normalize_coordinates_for_zoom, normalize_coordinates_for_screen_size, normalize_coordinates_to_screen
+from pywib.constants import ColumnNames
 
 DEBUG = True
 
@@ -25,8 +26,9 @@ class TestKeyboard(unittest.TestCase):
         self.test_data = process_csv(TestData.dataFile)
         
     def test_typing_speed(self):
-        data = normalize_coordinates_for_screen_size(self.test_data)
-        print(data)
+        data = normalize_coordinates_to_screen(self.test_data, ColumnNames.X, ColumnNames.Y, mode="diagonal", type="normalized")
+        print(type(data))
+        print(data[["x", "y", "eventType", "sessionId"]])
         print("Data printed")
         self.assertTrue(False)
 

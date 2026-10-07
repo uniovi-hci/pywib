@@ -302,14 +302,14 @@ def normalize_coordinates_for_zoom(df: pd.DataFrame, browser_name: str = "",
 def normalize_coordinates_for_screen_size(df: pd.DataFrame,
                                           x_col: str = ColumnNames.X,
                                           y_col: str = ColumnNames.Y,
-                                          mode: str = "diagonal") -> pd.DataFrame:
+                                          mode: str = "diagonal", type: str = "normalized") -> pd.DataFrame:
     """
-    Add screen-size-normalized coordinates to ONE session's trace.
+    Add screen-size-normalized coordinates to ONE session's trace in the range 0 to 1.
 
     mode="per_axis": x / screen_width, y / screen_height  -> use for positions, heatmaps, regions.
     mode="diagonal": x / diagonal, y / diagonal           -> use for distances (keeps the aspect ratio).
     """
-    validate_dataframe(df)
+    
     if(ColumnNames.SCREEN_WIDTH not in df.columns or ColumnNames.SCREEN_HEIGHT not in df.columns):
         raise ValueError(f"Columns {ColumnNames.SCREEN_WIDTH} and {ColumnNames.SCREEN_HEIGHT} must be in the DataFrame")
     normalized_trace = df.copy()                                   # Never modify the caller's data
@@ -336,8 +336,45 @@ def normalize_coordinates_for_screen_size(df: pd.DataFrame,
         has_valid_position, normalized_trace[x_col] / x_scale, normalized_trace[x_col])
     normalized_trace["y_screen_normalized"] = np.where(                  # Same for y
         has_valid_position, normalized_trace[y_col] / y_scale, normalized_trace[y_col])
+
+    if type == "normalized":
+        pass
+    elif type == "pixels":
+        # Multiply back by a 1920x1080 diagonal
+        reference_diagonal = np.hypot(1920, 1080)
+        normalized_trace["x_screen_normalized"] = np.where(
+            has_valid_position,
+            normalized_trace["x_screen_normalized"] * reference_diagonal,
+            normalized_trace["x_screen_normalized"],
+        )
+        normalized_trace["y_screen_normalized"] = np.where(
+            has_valid_position,
+            normalized_trace["y_screen_normalized"] * reference_diagonal,
+            normalized_trace["y_screen_normalized"],
+        )
     
-    normalized_trace[ColumnNames.X] = normalized_trace["x_screen_normalized"]
-    normalized_trace[ColumnNames.Y] = normalized_trace["y_screen_normalized"]
+    normalized_trace[x_col] = normalized_trace["x_screen_normalized"]
+    normalized_trace[y_col] = normalized_trace["y_screen_normalized"]
 
     return normalized_trace.drop(columns=["x_screen_normalized", "y_screen_normalized"])
+
+def normalize_coordinates_to_screen(df: pd.DataFrame, x_col: str, y_col: str,
+                                    mode: str = "diagonal", type: str = "normalized") -> pd.DataFrame:
+    """Apply screen-size normalization independently to each session."""
+
+    validate_dataframe(df)
+
+    return df.groupby(
+        ColumnNames.SESSION_ID,
+        sort=False,
+        group_keys=False,
+    ).apply(
+        lambda session_df: normalize_coordinates_for_screen_size(
+            session_df,
+            x_col=x_col,
+            y_col=y_col,
+            mode=mode,
+            type=type
+        ).assign(**{ColumnNames.SESSION_ID: session_df.name}),
+    )
+    
