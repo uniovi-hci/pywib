@@ -1,4 +1,4 @@
-Keystorke Dynamics
+Keystroke Dynamics
 ==================
 
 

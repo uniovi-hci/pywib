@@ -1,0 +1,9 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "PyWIB",
+  "description": "Python library for analysing user interaction data recorded from web pages and computing HCI research metrics.",
+  "folders": ["docs"],
+  "excludeFolders": ["src" ,"test"],
+  "excludeFiles": [".gitignore"],
+  "rules": ["Pass arguments by keyword", "Treat metrics as context-dependent", "Consider when and when not to use per_traces"],
+}

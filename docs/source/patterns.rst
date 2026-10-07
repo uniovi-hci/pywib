@@ -7,7 +7,7 @@ Introduction
 In the context of HCI, mouse behavioral patterns refer to the combination of mouse movements, clicks and general interaction that can be explained or associated with specific user behaviors, cognitive states or activities while interacting with a computer interface.
 This patterns have been identified in various studies analyzing user interaction with web pages, applications and forms, but a formal "catalog" of such patterns can not be found easily in the literature, therefore this section aims to summarize those patterns thathave been identified and described in previous research works to help researchers in the field of HCI better understand and analyze user behavior.
 
-Original text from cite:`Katerina2018-ch`.
+Original text from :cite:`Katerina2018-ch`.
 
 *In the area of HCI researchers have been trying to quantify the movement of humans who perform pointing tasks on computers and other devices. Mouse cursor movement is a vital part in this field and has been used in many studies.*
 
@@ -60,21 +60,4 @@ Guide Pattern
 Defined in Lee and Chen (2006), the guide pattern defines a behavior of continuous movement of the cursor. According to the authors this pattern seems to reflex an “exploratory” role that suggests a relationship between mouse and eye movement” and hence this pattern may give us an idea of the user expectations. Hence, guide pattern may be associated with users’ acceptance, i.e. perceived usefulness and ease of use and also willingness to learn.
 
 However, guide pattern is very similar to the reading pattern since it can be expressed via ‘smooth’ (i.e. slow) cursor movements identifying horizontal or vertical reading.
-
-Keystroke dynamics in HCI
-=========================
-
-`Epp et al. (2011) <https://doi.org/10.1145/1978942.1979046>`_ describes keystroke dynamics as ‘the study of the unique timing patterns in an individual's typing, and typically includes extracting keystroke timing features such as the duration of a key press and the time elapsed between key presses”.
-
-Recently, keystroke dynamics have been used in affective computing research to detect user affective states like mood and emotions (Epp et al. 2011; Khanna & Sasikumar, 2010).
-
-Attributes taking into consideration when analuzing keystroke dynamics are: tying speed, mode, std. deviation/variance, range, total time taken, number of backspaces used and interval between typing.
-
-There is not much research in analyzing keystroke dynamics and end-users behavioral states. Some related research may concern personality detection through keyboard and mouse input.
-
-The keyboard attributes measured in two exploratory studies were ‘key-up’ and key-down’. Their findings revealed some limited significance since only recording the standard deviation of the average time between events gave some insight into a user's activity level, a sub trait of extraversion.
-
-In Vizer, Zhou, and Sears (2009) the authors used keystroke timing features of free text in conjunction with linguistic features to identify cognitive and physical stress.
-In a more related study of Dijkstra (2013) the author examined the correlation between mouse or keyboard input and self-efficacy levels. Although mouse input showed some promising results for detecting self-efficacy levels, no correlations were found between typing keyboard behavior and self-efficacy.
-
 

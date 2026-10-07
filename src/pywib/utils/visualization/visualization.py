@@ -20,8 +20,9 @@ def visualize_trace(df, stroke_indices, stroke_id, type: str = "simple", trace_s
         stroke_id (str): Identifier for the stroke to be displayed in the title.
         type (str): The type of visualization strategy to use. Options are: "simple", "info", "optimal_line", "full" or "standardized". 
         trace_strategy (TraceVisualizationType): Instead of stating the type, the visualization type can be passed as a string or as a newly implemented class.
-        plot_name (str, optional): If provided, saves the plot to this file path.
+        plot_name (str?): If provided, saves the plot to this file path.
         plot (bool): Whether to display the plot.
+        save_path (str?): Directory path to save the plot if plot_name is provided. Must include file extension (supported formats: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff, webp). If not provided, saves in the current working directory.
         **kwargs: Additional arguments to pass to the visualization strategy.
     """
     stroke_data = df.loc[stroke_indices]
@@ -45,8 +46,7 @@ def visualize_trace(df, stroke_indices, stroke_id, type: str = "simple", trace_s
     strategy.apply(ax, stroke_data, stroke_id)
 
     if plot_name:
-        file_path = os.path.join(save_path, plot_name) if save_path else plot_name
-        plt.savefig(file_path, bbox_inches='tight', dpi=300)
+        plt.savefig(save_path, bbox_inches='tight', dpi=300)
 
     if plot:
         plt.show()

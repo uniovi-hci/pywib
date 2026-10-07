@@ -15,7 +15,7 @@ from pybtex.style.template import (
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'pywib'
+project = 'PyWIB'
 copyright = '2025, Guillermo Dylan Carvajal Aza, Alejandro Álvarez Varela'
 author = 'Guillermo Dylan Carvajal Aza, Alejandro Álvarez Varela'
 release = '2.1.0'

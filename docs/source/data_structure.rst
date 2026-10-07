@@ -1,5 +1,5 @@
 Data structures required to use PyWIB
--------------------------------------
+=====================================
 
 The library operates on a :class:`pandas.DataFrame` in which each row represents
 a single interaction event. This page describes the expected columns and shows
@@ -66,7 +66,14 @@ functionality; if absent, the library falls back to default behavior.
 .. note::
 
    Column names are **case-sensitive** and must match exactly as written above.
-   In case of doubt, please use :py:class:`~pywib.ColumnNames`
+   
+   In case of doubt, please use values from the class :py:class:`~pywib.ColumnNames`.
+   
+   .. code-block:: python
+
+      from pywib import ColumnNames
+
+      print(ColumnNames.SESSION_ID)  # prints "sessionId"
 
 Example
 -------
@@ -76,17 +83,18 @@ The following DataFrame contains the required columns plus a few optional ones:
 .. code-block:: python
 
    import pandas as pd
+   from pywib import ColumnNames
 
    df = pd.DataFrame({
-       "sessionId": ["s1", "s1", "s1", "s2"],
-       "x":         [120.0, 245.5, 245.5, 30.0],
-       "y":         [80.0, 310.2, 310.2, 415.0],
-       "timeStamp": [1700000000, 1700000002, 1700000003, 1700000100],
-       "eventType": [0, 0, 13, 1],
-       "keyValue":  [-1, -1, "a", -1],
-       "keyCode":   [-1, -1, "KeyA", -1],
-       "elementId": [-1, -1, "input-name", "btn-exit"],
-       "sceneId":   ["intro", "intro", "intro", "outro"],
+       ColumnNames.SESSION_ID: ["s1", "s1", "s1", "s2"],
+       ColumnNames.X:         [120.0, 245.5, 245.5, 30.0],
+       ColumnNames.Y:         [80.0, 310.2, 310.2, 415.0],
+       ColumnNames.TIME_STAMP: [1700000000, 1700000002, 1700000003, 1700000100],
+       ColumnNames.EVENT_TYPE: [0, 0, 13, 1],
+       ColumnNames.KEY_VALUE":  [-1, -1, "a", -1],
+       ColumnNames.KEY_CODE:   [-1, -1, "KeyA", -1],
+       ColumnNames.ELEMENT_ID: [-1, -1, "input-name", "btn-exit"],
+       ColumnNames.SCENE_ID:   ["intro", "intro", "intro", "outro"],
    })
 
 Which renders as:
@@ -102,6 +110,7 @@ Which renders as:
 
 .. note::
     A function that renames columns has been created to ease working with this format.
+    
     See :py:func:`~pywib.to_pywib_df`
 
 Minimal example

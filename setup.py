@@ -14,7 +14,7 @@ setup(
     description='HCI Web Interaction Analyzer - A library for analyzing web user interactions',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/HumanCommunicationInteraction/pywib",
+    url="https://github.com/uniovi-hci/pywib",
     packages=find_packages(),
     author='Guillermo Dylan Carvajal Aza & Alejandro Varela Álvarez',
     author_email='carvajalguillermo@uniovi.es',

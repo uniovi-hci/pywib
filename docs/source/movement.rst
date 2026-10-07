@@ -3,6 +3,10 @@ Movement Metrics
 
 .. currentmodule:: pywib
 
+This sections describes metrics related to the movement of the mouse or touch interactions.
+
+All of this metrics can be computed by using traces. To understand traces, please refer to the `Segmentation <\segmentation.html>`_ section in the documentation.
+
 Velocity
 --------
 
@@ -24,8 +28,7 @@ The velocity is calculated as:
 
 where (|xi|, |yi|) are the coordinates and (|ti|) is the timestamp of point (|i|).
 
-The function :py:func:`~pywib.velocity_metrics` computes velocity metrics such as mean, max, and min of the velocity for each session.
-
+The function :py:func:`~pywib.velocity_metrics` computes the mean, max, and min of the velocity values for each session.
 
 Acceleration
 ------------

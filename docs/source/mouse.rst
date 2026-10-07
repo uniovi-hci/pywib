@@ -4,11 +4,7 @@ Mouse Metrics
 .. currentmodule:: pywib
 
 .. note::
-    On a touchscreen, a single tap generates both Pointer events (EVENT_POINTER_DOWN/MOVE/UP/CANCEL) and Mouse events (EVENT_ON_MOUSE_DOWN/MOVE/UP, EVENT_ON_CLICK/DOUBLE_CLICK) for the same interaction. Browsers always dispatch this fixed sequence of compatibility mouse events after touch input, for backwards compatibility.
-    
-    Check if your tracking script supports this case, otherwise filtering has to happen during data analysis. 
-    
-    Reference: https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListeners
+    This section must be read in conjunction with the `Context Specific Metrics: Mouse Clicks and Touch Taps <context_specific_metrics.html#mouse-clicks-and-touch-taps>`__ section to understand how browsers generate this events.
 
 Number of Clicks
 -----------------

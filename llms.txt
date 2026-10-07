@@ -1,0 +1,47 @@
+# PyWIB
+
+> PyWIB (Python Web Interaction Behaviour) is a Python library for analysing user interaction data recorded from web pages and computing HCI research metrics from it. It works on pandas DataFrames of event logs (mouse movement, clicks, keystrokes) and returns per-trace values and per-session metrics. Install with `pip install pywib`, import with `import pywib` (lowercase).
+
+Key facts for code generation:
+- Input is a DataFrame with columns such as `sessionId`, `eventType`, `timeStamp`, `x`, `y`. Input expected is defined in the [Data Structure page](https://uniovi-hci.github.io/pywib/data_structure.html). Column names and event-type codes are defined in the [Constants page](https://uniovi-hci.github.io/pywib/constants.html).
+- Most functions return `dict[str, list[pd.DataFrame]]`: session ID mapped to a list of traces (continuous interaction episodes). Metric functions return per-session dictionaries of statistics.
+- Pass arguments by keyword (for example `velocity_metrics(traces=vel)`); the first positional parameter of most functions is `df`, not `traces`.
+- Metrics are context-dependent (desktop mouse vs. touch, experiment setup). Treat results as descriptive measurements. Context specifity is explained in the [Context Specific Metrics page](https://uniovi-hci.github.io/pywib/context_specific_metrics.html).
+
+## Getting started
+
+- [Introduction](https://uniovi-hci.github.io/pywib/introduction.html): Purpose of the library, rationale, validity of metrics, installation, and a first example
+- [Constants](https://uniovi-hci.github.io/pywib/constants.html): Event type codes (`EventTypes`), DataFrame column names (`ColumnNames`), and UI component types (`ComponentTypes`)
+- [Segmentation](https://uniovi-hci.github.io/pywib/segmentation.html): What a trace is, and how movement and keystroke events are segmented into traces
+
+## Metric guides
+
+- [Movement Metrics](https://uniovi-hci.github.io/pywib/movement.html): Velocity, acceleration, jerkiness, angle, angular velocity and angular acceleration
+- [Trajectory Metrics](https://uniovi-hci.github.io/pywib/trajectory.html): Path and total distance, area under the curve, absolute deviations, direction changes and x/y direction flips
+- [Mouse Metrics](https://uniovi-hci.github.io/pywib/mouse.html): Number of clicks and click slip
+- [Keystroke Metrics](https://uniovi-hci.github.io/pywib/keyboard.html): Typing duration, typing speed and backspace usage
+- [Timing Metrics](https://uniovi-hci.github.io/pywib/timing.html): Execution time, movement time and number of pauses
+- [Visualization](https://uniovi-hci.github.io/pywib/visualization.html): Trace plots, session video generation and keystroke heatmaps
+
+## API reference
+
+- [API index](https://uniovi-hci.github.io/pywib/api/index.html): Overview of all public functions
+- [Velocity and velocity metrics](https://uniovi-hci.github.io/pywib/api/movement/velocity.html): `velocity(df, traces, per_traces, parallel, n_jobs)` and `velocity_metrics(df, traces)`
+- [Acceleration](https://uniovi-hci.github.io/pywib/api/movement/acceleration.html): Acceleration values and metrics
+- [Jerkiness](https://uniovi-hci.github.io/pywib/api/movement/jerkiness.html): Jerkiness values and metrics
+- [Angle](https://uniovi-hci.github.io/pywib/api/movement/angle.html): Angle, angular velocity and angular acceleration
+- [Clicks](https://uniovi-hci.github.io/pywib/api/mouse/clicks.html): Click count and click slip functions
+- [Distance](https://uniovi-hci.github.io/pywib/api/trajectory/path.html): Path length and total distance
+- [Area under the curve](https://uniovi-hci.github.io/pywib/api/trajectory/auc.html): AUC-based trajectory metrics
+- [Deviations](https://uniovi-hci.github.io/pywib/api/trajectory/deviations.html): Deviations from the ideal trajectory
+- [Keystroke dynamics](https://uniovi-hci.github.io/pywib/api/keyboard/keystrokes.html): Keystroke metric functions
+- [Pauses](https://uniovi-hci.github.io/pywib/api/timing/pauses.html): Pause detection
+- [Timing](https://uniovi-hci.github.io/pywib/api/timing/time.html): Execution and movement time functions
+- [Visualization utilities](https://uniovi-hci.github.io/pywib/api/utils/visualization.html): Plotting and video helpers
+- [Data processing utilities](https://uniovi-hci.github.io/pywib/api/utils/data_processing.html): Preprocessing helpers such as per-row time and space differences
+
+## Optional
+
+- [Source code](https://github.com/uniovi-hci/pywib): GitHub repository, including `AGENTS.md` with usage rules for AI coding agents
+- [PyPI](https://pypi.org/project/pywib/): Package releases
+- [Paper](https://www.thinkmind.org/library/IARIA_CONGRESS/IARIA_Congress_2026/iaria_congress_2026_1_170_50103.html): PyWIB: A Python Library for a Multi-Modal Approach to Web Interaction Behavior Analysis (IARIA Congress 2026), cite this if you use the library in research

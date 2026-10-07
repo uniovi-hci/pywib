@@ -24,19 +24,8 @@ The function :py:func:`~pywib.total_distance` calculates the total distance for 
 
 .. note::
    Computing the path per traces and without traces does not render the same "global" result.
-   Consider a session with 5 events, if event number 3 is not a movement event (i.e: click, keyboard), then computing its total distance gives a smaller value when computing it by traces than by the whole DataFrame.
-   The following table illustrates a case in which a user performs a click event on timeStamp 300 and causes the total computed distance to be less than the expected total (400).
-
-
-==================  =========  ===  =   ===  ==  ===========  ========
-Trace               eventType  x    y   dx   dy  timeStamp    distance
-==================  =========  ===  =   ===  ==  ===========  ========
-Trace 1             0          0    0   0    0   100          0
-Trace 1             0          100  0   100  0   200          100
-**Trace boundary**  3          200  0   0    0   300          _
-Trace 2             0          300  0   100  0   200          100
-Trace 2             0          400  0   100  0   200          100
-==================  =========  ===  =   ===  ==  ===========  ========
+   
+   To get more information about this, refer to the `Context Specific Metrics <\context_specific_metrics.html>`_ section in the documentation.
 
 AUC
 ---

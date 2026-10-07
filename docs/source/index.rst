@@ -1,7 +1,5 @@
 .. PyWIB documentation master file, created by
-   sphinx-quickstart on Mon Oct  6 13:40:36 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+   sphinx-quickstart on Mon Oct  6 13:40:36 2025 by Guillermo Dylan Carvajal Aza.
 
 PyWIB documentation
 ===================
@@ -16,6 +14,8 @@ Pywib (Python Web Interaction Behavior) is a library designed to analyze user in
 
 The library includes various modules for different aspects of web interaction analysis, such as movement tracking, timing analysis, and pause detection.
 
+A good start to understand PyWIBs library is to read the `introduction </introduction.html>`__ section, which provides an overview of the library's capabilities and how to get started with it.
+
 Contents
 ---------
 
@@ -24,7 +24,7 @@ Contents
 
    introduction
    constants
-   data_structures
+   data_structure
    movement
    trajectory
    mouse
@@ -32,6 +32,7 @@ Contents
    timing
    segmentation
    visualization
+   patterns
    api/index
 
-This library has been developed by the `HCI research group <https://www.hci.uniovi.es/>`_ from the University of Oviedo and is maintained on `GitHub <https://github.com/HumanCommunicationInteraction/pywib>`_.
+This library has been developed by the `HCI research group <https://www.hci.uniovi.es/>`__ from the University of Oviedo and is maintained on `GitHub <https://github.com/uniovi-hci/pywib>`_.
