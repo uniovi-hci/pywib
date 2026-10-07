@@ -30,10 +30,10 @@ class TestData:
         dataFile_4= 'pywib/test/test_data/test_trajectory_single.csv'
         dataFile_5 = 'pywib/test/test_data/test_trajectory.csv'
 
-    totalDistance = 1800
-    totalDistance_SESSIONA = 1800
+    totalDistance = float(4778.86708428897)
+    totalDistance_SESSIONA = float(3070.066335225463)
     totalDistance_SESSIONB = 1800
-    totalDistance_SESSIONA_trace = 1400
+    totalDistance_SESSIONA_trace = float(2061.577310586391)
     totalDistance_SESSIONB_trace = 1600
 
 

@@ -51,6 +51,9 @@ class EventTypes:
     """Custom event type for ending tracking."""
     MOBILE_EVENTS_LIST = [EVENT_POINTER_CANCEL, EVENT_POINTER_DOWN, EVENT_POINTER_UP, EVENT_ON_POINTER_MOVE]
     """List of event types relevant for mobile interactions."""
+    KEYBOARD_EVENTS_LIST = [EVENT_KEY_DOWN, EVENT_KEY_PRESS, EVENT_KEY_UP]
+    """"""
+    SCROLL_EVENTS_LIST = [EVENT_WINDOW_SCROLL, EVENT_ON_WHEEL]
 
 class ComponentTypes:
     """ Component type constants for UI elements."""

@@ -26,9 +26,9 @@ class TestKeyboard(unittest.TestCase):
         self.test_data = process_csv(TestData.dataFile)
         
     def test_typing_speed(self):
-        data = normalize_coordinates_to_screen(self.test_data, ColumnNames.X, ColumnNames.Y, mode="diagonal", type="normalized")
-        print(type(data))
-        print(data[["x", "y", "eventType", "sessionId"]])
+        data = normalize_coordinates_for_zoom(self.test_data[self.test_data["sessionId"] == "SESSION_A"], "chrome")
+        print(data.columns)
+        print(data[["x", "y", "x_normalized", "y_normalized", "zoom_classification", "cumulative_scale"]])
         print("Data printed")
         self.assertTrue(False)
 
