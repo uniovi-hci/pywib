@@ -163,22 +163,40 @@ def auc_traces(traces: dict[str, list[pd.DataFrame]]) -> dict[str, list[tuple]]:
         auc_sessions[session_id] = auc_per_trace
     return auc_sessions
 
+# Element budget for a broadcast (row, segment) float64 temporary: one
+# temp peaks at ~32 MiB (2**22 elements) regardless of segment count.
+_AUC_CHUNK_MAX_ELEMS = 1 << 22
+
 def _auc_geometric_deviation(df):
     df_opt = compute_optimal_path(df)
     # Prepare arrays
     user_x, user_y = df[ColumnNames.X].values, df[ColumnNames.Y].values
     opt_x, opt_y = df_opt[ColumnNames.X].values, df_opt[ColumnNames.Y].values
 
-    # Compute perpendicular distances from optimal points to user segments
-    dists = []
-    for i in range(len(opt_x)):
-        px, py = opt_x[i], opt_y[i]
-        # Compute distance to all user segments and take minimum
-        seg_dists = [
-            point_to_segment_distance(px, py, user_x[j], user_y[j], user_x[j+1], user_y[j+1])
-            for j in range(len(user_x)-1)
-        ]
-        dists.append(min(seg_dists))
+    if len(user_x) < 2:
+        raise ValueError("Need at least 2 points")
+
+    # Compute perpendicular distances from optimal points to user segments.
+    # Same projection math as point_to_segment_distance, broadcast over all
+    # (point, segment) pairs and evaluated in row chunks to bound memory.
+    ax, ay = user_x[:-1], user_y[:-1]
+    bx, by = user_x[1:], user_y[1:]
+    abx, aby = bx - ax, by - ay
+    denom = abx * abx + aby * aby
+    safe_denom = np.where(denom > 0, denom, 1.0)
+
+    dists = np.empty(len(opt_x), dtype=float)
+    # Bound each (row, segment) temporary by a fixed element budget so peak
+    # memory scales with the segment count: chunk rows = budget // segments.
+    chunk = max(1, _AUC_CHUNK_MAX_ELEMS // max(len(ax), 1))
+    for start in range(0, len(opt_x), chunk):
+        px = opt_x[start:start + chunk, None]
+        py = opt_y[start:start + chunk, None]
+        t = ((px - ax) * abx + (py - ay) * aby) / safe_denom
+        np.clip(t, 0.0, 1.0, out=t)
+        cx = ax + t * abx
+        cy = ay + t * aby
+        dists[start:start + chunk] = np.hypot(px - cx, py - cy).min(axis=1)
 
     # Integrate along optimal path
     # Compute optimal path length increments (arc-length)
