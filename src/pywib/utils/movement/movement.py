@@ -3,6 +3,7 @@ import numpy as np
 from pywib.constants import ColumnNames, EventTypes
 from pywib.utils import validate_dataframe, compute_space_time_diff
 from pywib.utils.utils import deprecated
+from pywib.utils.batch import TRACE_ID, concat_session, space_time_diff_grouped, split_full
 from joblib import Parallel, delayed
 
 def velocity_df(df: pd.DataFrame) -> pd.DataFrame:
@@ -28,17 +29,37 @@ def velocity_traces(traces: dict[str, list[pd.DataFrame]]) -> dict[str, list[pd.
     """
     Calculate velocity for a dictionary of traces (each a list of DataFrames).
 
+    The whole session is processed as one concatenated DataFrame grouped by
+    trace, removing the fixed per-trace validate/copy/sort/diff cost.
+
     Parameters:
         traces (dict[str, list[pd.DataFrame]]): Mapping of sessionId to list of DataFrames.
 
     Returns:
         dict[str, list[pd.DataFrame]]: Same structure, but with velocity computed in each DataFrame.
     """
+    extra = (ColumnNames.DT, ColumnNames.DX, ColumnNames.DY,
+             ColumnNames.DISTANCE, ColumnNames.VELOCITY)
     for session_id, session_traces in traces.items():
-        for i, df in enumerate(session_traces):
-            validate_dataframe(df)
-            session_traces[i] = velocity_df(df)
-        traces[session_id] = session_traces
+        combined, sizes, ok = concat_session(session_traces)
+        if not ok or combined is None:
+            if not ok:
+                for i, df in enumerate(session_traces):
+                    validate_dataframe(df)
+                    session_traces[i] = velocity_df(df)
+                traces[session_id] = session_traces
+                continue
+            traces[session_id] = split_full(None, session_traces, extra)
+            continue
+        combined = combined[(combined[ColumnNames.X] > -1) & (combined[ColumnNames.Y] > -1)]
+        combined = space_time_diff_grouped(combined)
+        combined[ColumnNames.DISTANCE] = np.hypot(combined[ColumnNames.DX], combined[ColumnNames.DY])
+        combined[ColumnNames.VELOCITY] = np.where(
+            combined[ColumnNames.DT] != 0,
+            combined[ColumnNames.DISTANCE] / combined[ColumnNames.DT],
+            0,
+        )
+        traces[session_id] = split_full(combined, session_traces, extra)
     return traces
 
 def velocity_traces_parallel(traces: dict[str, list[pd.DataFrame]], n_jobs: int = 2) -> dict[str, list[pd.DataFrame]]:
@@ -63,6 +84,27 @@ def velocity_traces_parallel(traces: dict[str, list[pd.DataFrame]], n_jobs: int 
         )
         traces[session_id] = session_traces
     return traces
+
+def _batch_diff_over_dt(session_traces, source_col, out_col, extra):
+    """Batched per-trace ``diff(source)/DT`` with 0 where DT == 0.
+
+    Mirrors acceleration_df/jerkiness_df arithmetic (group-wise diff,
+    first row 0) without the per-trace validate/copy/sort overhead.
+    Returns None when a trace has a duplicated index — callers fall
+    back to the per-trace loop.
+    """
+    combined, sizes, ok = concat_session(session_traces)
+    if combined is None:
+        return split_full(None, session_traces, extra)
+    if not ok:
+        return None
+    diffed = combined.groupby(TRACE_ID, sort=False)[source_col].diff().fillna(0)
+    combined[out_col] = np.where(
+        combined[ColumnNames.DT] != 0,
+        diffed / combined[ColumnNames.DT],
+        0,
+    )
+    return split_full(combined, session_traces, extra)
 
 def acceleration_df(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -96,7 +138,19 @@ def acceleration_traces(traces: dict[str, list[pd.DataFrame]]) -> dict[str, list
     Returns:
         dict[str, list[pd.DataFrame]]: Same structure, but with acceleration computed in each DataFrame.
     """
+    extra = (ColumnNames.ACCELERATION,)
     for session_id, session_traces in traces.items():
+        fast = all(
+            ColumnNames.VELOCITY in df.columns and ColumnNames.DT in df.columns
+            for df in session_traces
+        )
+        if fast:
+            batched = _batch_diff_over_dt(
+                session_traces, ColumnNames.VELOCITY, ColumnNames.ACCELERATION, extra
+            )
+            if batched is not None:
+                traces[session_id] = batched
+                continue
         for i, df in enumerate(session_traces):
             validate_dataframe(df)
             session_traces[i] = acceleration_df(df)
@@ -135,7 +189,19 @@ def jerkiness_traces(traces: dict[str, list[pd.DataFrame]]) -> dict[str, list[pd
     Returns:
         dict[str, list[pd.DataFrame]]: Same structure, but with jerkiness computed in each DataFrame.
     """
+    extra = (ColumnNames.JERKINESS,)
     for session_id, session_traces in traces.items():
+        fast = all(
+            ColumnNames.ACCELERATION in df.columns and ColumnNames.DT in df.columns
+            for df in session_traces
+        )
+        if fast:
+            batched = _batch_diff_over_dt(
+                session_traces, ColumnNames.ACCELERATION, ColumnNames.JERKINESS, extra
+            )
+            if batched is not None:
+                traces[session_id] = batched
+                continue
         for i, df in enumerate(session_traces):
             validate_dataframe(df)
             session_traces[i] = jerkiness_df(df)

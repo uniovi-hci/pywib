@@ -3,6 +3,7 @@ from pywib.utils.validation import validate_any_not_none, validate_dataframe
 from pywib.utils.segmentation import extract_traces_by_session
 from pywib.utils.timing import num_pauses_df, num_pauses_traces, pauses_metrics_df, pauses_metrics_per_trace
 from pywib.utils.utils import compute_space_time_diff
+from pywib.utils.batch import concat_session, space_time_diff_grouped
 from pywib.constants import ColumnNames
 
 def execution_time(df: pd.DataFrame) -> dict:
@@ -46,9 +47,19 @@ def movement_time(df: pd.DataFrame, traces: dict[str, list[pd.DataFrame]] = None
 
     movement_time_per_session = {}
     for session_id, session_traces in traces.items():
+        combined, sizes, ok = concat_session(session_traces)
+        if combined is None:
+            movement_time_per_session[session_id] = 0.0
+            continue
+        if ok:
+            combined = space_time_diff_grouped(combined)
+            movement_time_per_session[session_id] = float(
+                combined[ColumnNames.DT].sum()
+            )
+            continue
         total_movement_time = 0.0
         for trace in session_traces:
-            trace = compute_space_time_diff(trace)  
+            trace = compute_space_time_diff(trace)
             total_movement_time += trace[ColumnNames.DT].sum()
         movement_time_per_session[session_id] = total_movement_time
 
