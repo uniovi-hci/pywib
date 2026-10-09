@@ -96,7 +96,7 @@ def find_zoom_bursts(trace_df: pd.DataFrame, max_gap_ms: int = 150):
     """Group wheel / scroll / resize / zoom-key events into bursts; keep bursts containing a resize."""
     key_direction = trace_df[ColumnNames.KEY_VALUE].astype(str).map(ZOOM_KEY_TO_DIRECTION)   # 'in'/'out'/'reset' or NaN
     is_zoom_key = trace_df[ColumnNames.EVENT_TYPE].isin(EventTypes.KEYBOARD_EVENTS_LIST) & key_direction.notna()  # Only zoom keys, not typing
-    is_zoom_related = (trace_df[ColumnNames.EVENT_TYPE].isin([EventTypes.SCROLL_EVENTS_LIST, EventTypes.EVENT_WINDOW_RESIZE])
+    is_zoom_related = (trace_df[ColumnNames.EVENT_TYPE].isin(EventTypes.SCROLL_EVENTS_LIST + [EventTypes.EVENT_WINDOW_RESIZE])
                        | is_zoom_key)                      # Every event that can belong to a zoom
     zoom_related_events = trace_df[is_zoom_related]        # Mouse moves and other events are ignored here
     burst_id = (zoom_related_events[ColumnNames.TIME_STAMP].diff() > max_gap_ms).cumsum()  # New burst after a long gap
@@ -120,7 +120,7 @@ def normalize_coordinates_for_zoom(trace_df, browser_name="", max_gap_ms=150, lo
     sorted_trace[ColumnNames.TIME_STAMP] = pd.to_numeric(sorted_trace[ColumnNames.TIME_STAMP], errors="coerce")
     sorted_trace = sorted_trace.sort_values(ColumnNames.TIME_STAMP, kind="stable").reset_index(drop=True)
     x_positions = sorted_trace[ColumnNames.X].to_numpy(float)                         # pageX values
-    has_position = (sorted_trace[ColumnNames.EVENT_TYPE].isin(EventTypes.SCROLL_EVENTS_LIST)
+    has_position = (sorted_trace[ColumnNames.EVENT_TYPE].isin([EventTypes.EVENT_ON_MOUSE_MOVE, EventTypes.EVENT_ON_WHEEL])
                     & (sorted_trace[ColumnNames.X] > -1) & (sorted_trace[ColumnNames.Y] > -1))  # Events that carry a real position
 
     current_level_index = int(np.argmin(np.abs(zoom_levels - initial_zoom_factor)))  # Starting zoom level
