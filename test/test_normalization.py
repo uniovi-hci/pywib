@@ -41,13 +41,13 @@ class TestNormalziation(unittest.TestCase):
 
     def test_normalization_pixels(self):
         data = normalize_coordinates_for_screen_size(self.test_data.copy(), ColumnNames.X, ColumnNames.Y, "diagonal", "pixels")
-        self.assertTrue(data[ColumnNames.X].between(-1, 1920).all())
-        self.assertTrue(data[ColumnNames.Y].between(-1, 1080).all())
+        range_max = np.hypot(1920, 1080) 
+        self.assertTrue(data[ColumnNames.X].between(-1, range_max).all())
+        self.assertTrue(data[ColumnNames.Y].between(-1, range_max).all())
 
     def test_normalization_per_axis_pixels(self):
         data = normalize_coordinates_for_screen_size(self.test_data.copy(), ColumnNames.X, ColumnNames.Y, "per_axis", "pixels")
         self.assertTrue(data[ColumnNames.X].between(-1, 1920).all())
-        print(data[data[ColumnNames.Y] > 1080])
         self.assertTrue(data[ColumnNames.Y].between(-1, 1080).all())
 
     # Test cases for Zoom normalization
@@ -159,6 +159,7 @@ class TestNormalziation(unittest.TestCase):
  
     @unittest.expectedFailure
     def test_large_move_during_zoom(self):
+        # TODO document limitation in appropiate file
         # KNOWN LIMITATION: the +179 px flick looks like a zoom OUT (ratio 1.1125), so the scale comes out as
         # 1.111 instead of the real 0.909, without any warning. This asserts the CORRECT result.
         result = self.normalize_trace("SESSION_S")

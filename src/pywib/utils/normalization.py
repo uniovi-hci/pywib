@@ -174,12 +174,10 @@ def normalize_coordinates_for_zoom(trace_df, browser_name="", max_gap_ms=150, lo
     sorted_trace["y_normalized"] = np.where(has_valid_position, sorted_trace[ColumnNames.Y] / sorted_trace["cumulative_scale"], sorted_trace[ColumnNames.Y])
     return sorted_trace
 
-
-
 def normalize_coordinates_for_screen_size(df: pd.DataFrame,
                                           x_col: str = ColumnNames.X,
                                           y_col: str = ColumnNames.Y,
-                                          mode: str = "diagonal", type: str = "normalized") -> pd.DataFrame:
+                                          mode: str = "diagonal", type: str = "normalized", pixelsX: int = 1920, pixelsY: int = 1080) -> pd.DataFrame:
     """
     Add screen-size-normalized coordinates to ONE session's trace in the range 0 to 1.
 
@@ -212,21 +210,25 @@ def normalize_coordinates_for_screen_size(df: pd.DataFrame,
     normalized_trace["x_screen_normalized"] = np.where(                  # Scale valid x, keep sentinels as they are
         has_valid_position, normalized_trace[x_col] / x_scale, normalized_trace[x_col])
     normalized_trace["y_screen_normalized"] = np.where(                  # Same for y
+        
         has_valid_position, normalized_trace[y_col] / y_scale, normalized_trace[y_col])
 
     if type == "normalized":
         pass
     elif type == "pixels":
-        # Multiply back by a 1920x1080 diagonal
-        reference_diagonal = np.hypot(1920, 1080)
+        # Multiply back by a pixelsX x pixelsY diagonal
+        if mode == "per_axis":                                    # Independent scale per axis
+            x_scale, y_scale = pixelsX, pixelsY
+        elif mode == "diagonal":                                  # One shared scale for both axes
+            x_scale = y_scale = np.hypot(pixelsX, pixelsY)        # Screen diagonal in px
         normalized_trace["x_screen_normalized"] = np.where(
             has_valid_position,
-            normalized_trace["x_screen_normalized"] * reference_diagonal,
+            normalized_trace["x_screen_normalized"] * x_scale,
             normalized_trace["x_screen_normalized"],
         )
         normalized_trace["y_screen_normalized"] = np.where(
             has_valid_position,
-            normalized_trace["y_screen_normalized"] * reference_diagonal,
+            normalized_trace["y_screen_normalized"] * y_scale,
             normalized_trace["y_screen_normalized"],
         )
     
