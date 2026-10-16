@@ -32,6 +32,22 @@ The method can be either run with either :python:`per_traces=True` or :python:`p
 
 This is important to consider for the specific given dataset, if the data contains anything else than keystroke data, then :python:`per_traces=True` should be used to avoid incorrect CPM calculations. Whereas a dataset of consecutive keystroke events can be processed with per_traces=False to obtain a single CPM.
 
+Metrics for typing speed
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This method returns a collection of metrics for each user, in the form of a dict[str, dict[str, number]].
+The first string corresponds to the sessionId, whereas the inner dictionary contains the following keys:
+- average_typing_speed
+- total_characters
+- total_time_seconds
+- avg_keydown_to_keyup_duration
+
+.. warning::
+   As of version 2.1.0. avg_keydown_to_keyup_duration is experimenting a computational error and always returns .NaN
+
+.. autofunction:: pywib.typing_speed_metrics
+
+
 Typing Durations
 -----------------
 .. autofunction:: pywib.typing_durations

@@ -7,7 +7,7 @@ __email__ = "carvajalguillermo@uniovi.es"
 
 from .constants import *
 from .utils import (validate_dataframe, validate_dataframe_keyboard, 
-                    extract_traces_by_session, visualize_trace, compute_space_time_diff, 
+                    extract_traces_by_session, extract_keystroke_traces_by_session, visualize_trace, compute_space_time_diff, 
                     video_from_trace, validate_duplicate_timestamps, keyboard_heatmap, to_pywib_df,
                     TraceVisualizationType, TraceVisualizationStrategy, StandardizedTraceVisualization,
                     SimpleTraceVisualization, OptimalLineTraceVisualization, InfoTraceVisualization,
@@ -36,6 +36,7 @@ __all__ = [
     "visualize_trace",
     "compute_space_time_diff",
     "extract_traces_by_session",
+    "extract_keystroke_traces_by_session",
     "video_from_trace",
     "validate_duplicate_timestamps",
     "keyboard_heatmap",
