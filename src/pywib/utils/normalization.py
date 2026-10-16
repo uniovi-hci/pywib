@@ -114,7 +114,7 @@ def find_anchor_events(trace_df, burst, has_position):
 
 
 def normalize_coordinates_for_zoom(trace_df, browser_name="", max_gap_ms=150, log_tolerance=0.04,
-                                   min_valid_x=100, initial_zoom_factor=1.0):
+                                   min_valid_x=100, initial_zoom_factor=1.0) -> pd.DataFrame:
     zoom_levels = get_zoom_levels_for_browser(browser_name)                   # Zoom steps of this browser
     sorted_trace = trace_df.copy()
     sorted_trace[ColumnNames.TIME_STAMP] = pd.to_numeric(sorted_trace[ColumnNames.TIME_STAMP], errors="coerce")
@@ -238,7 +238,7 @@ def normalize_coordinates_for_screen_size(df: pd.DataFrame,
     return normalized_trace.drop(columns=["x_screen_normalized", "y_screen_normalized"])
 
 def normalize_coordinates_to_screen(df: pd.DataFrame, x_col: str, y_col: str,
-                                    mode: str = "diagonal", type: str = "normalized") -> pd.DataFrame:
+                                    mode: str = "diagonal", type: str = "normalized", pixelsX: int = 1920, pixelsY: int = 1080) -> pd.DataFrame:
     """Apply screen-size normalization independently to each session."""
 
     validate_dataframe(df)
@@ -253,7 +253,32 @@ def normalize_coordinates_to_screen(df: pd.DataFrame, x_col: str, y_col: str,
             x_col=x_col,
             y_col=y_col,
             mode=mode,
-            type=type
+            type=type,
+            pixelsX=pixelsX,
+            pixelsY=pixelsY
         ).assign(**{ColumnNames.SESSION_ID: session_df.name}),
     )
+
+def normalize_zoom(trace_df: pd.DataFrame, browser_name : str = "", max_gap_ms: int = 150, log_tolerance: float = 0.04, min_valid_x: int = 100, initial_zoom_factor: int = 1.0):
+    """
+    Normalizes a DataFrame to adapt its coordinates depending on the zoom bursts.
+    This process is important for...
     
+    Parameters:
+        trace_df (pd.DataFrame): The trace to normalize
+        browser_name (str): The name of the browser used in the session (only one). Case insensitive. Must be one of: chrome, opera, firefox, opera or safari
+        max_gap_ms (int): The max gap between an event of scroll and an event of zoom to consider it a zoom in/out
+        log_tolerance (float):
+        min_valid_x (int): 
+        initial_zoom_factor (int): The initial zoom the session statrted with, by default it's 1 (100%)
+
+    Returns:
+        pd.DataFrame: The normalized DataFrame with its columns
+    """
+    # @Programmers note: 
+    df = normalize_coordinates_for_zoom(trace_df=trace_df, browser_name=browser_name, max_gap_ms=max_gap_ms, log_tolerance=log_tolerance, min_valid_x=min_valid_x, initial_zoom_factor=initial_zoom_factor)
+
+    df[ColumnNames.X] = df["x_normalized"]
+    df[ColumnNames.Y] = df["y_normalized"]
+    
+    return df.drop(columns=["x_normalized", "y_normalized", "cumulative_scale", "zoom_break", "zoom_classification"])

@@ -1,5 +1,7 @@
 import unittest
 import numpy as np
+import pandas as pd
+from pandas.testing import assert_series_equal
 import sys
 import os
 sys.path.insert(0, os.path.dirname(__file__))
@@ -50,6 +52,41 @@ class TestNormalziation(unittest.TestCase):
         self.assertTrue(data[ColumnNames.X].between(-1, 1920).all())
         self.assertTrue(data[ColumnNames.Y].between(-1, 1080).all())
 
+    def test_normalize_denormalize_per_axis(self):
+        """Normalizing a trace and then multiplying it back against its screen size should render the same result when done per_axis"""
+        original = self.test_data.copy()
+        data = normalize_coordinates_for_screen_size(original.copy(), ColumnNames.X, ColumnNames.Y, "per_axis", "normalized")
+        screenHeight = data[ColumnNames.SCREEN_HEIGHT][0]
+        screenWidth = data[ColumnNames.SCREEN_WIDTH][0]
+        data[ColumnNames.X] = (data[ColumnNames.X] * screenWidth).astype(original[ColumnNames.X].dtype)
+        data[ColumnNames.Y] = (data[ColumnNames.Y] * screenHeight).astype(original[ColumnNames.Y].dtype)
+        data.loc[data[ColumnNames.X] < 0, ColumnNames.X] = -1
+        data.loc[data[ColumnNames.Y] < 0, ColumnNames.Y] = -1
+        assert_series_equal(data[ColumnNames.X], original[ColumnNames.X])
+        assert_series_equal(data[ColumnNames.Y], original[ColumnNames.Y])
+
+    def test_normalize_denormalizes(self):
+            """Normalizing a trace and then multiplying it back against its diagonal size should render the same result when done per_axis"""
+            original = self.test_data.copy()
+            data = normalize_coordinates_for_screen_size(original.copy(), ColumnNames.X, ColumnNames.Y, "diagonal", "normalized")
+            screenHeight = data[ColumnNames.SCREEN_HEIGHT][0]
+            screenWidth = data[ColumnNames.SCREEN_WIDTH][0]
+            diagonal = np.hypot(screenWidth, screenHeight)
+            data[ColumnNames.X] = (data[ColumnNames.X] * diagonal).astype(original[ColumnNames.X].dtype)
+            data[ColumnNames.Y] = (data[ColumnNames.Y] * diagonal).astype(original[ColumnNames.Y].dtype)
+            data.loc[data[ColumnNames.X] < 0, ColumnNames.X] = -1
+            data.loc[data[ColumnNames.Y] < 0, ColumnNames.Y] = -1
+            assert_series_equal(data[ColumnNames.X], original[ColumnNames.X])
+            assert_series_equal(data[ColumnNames.Y], original[ColumnNames.Y])
+
+    def test_normalize_denormalize_same_size(self):
+        """A trace that is normalized in pixels against its same size should not change."""
+        original = self.test_data.copy()
+        screenHeight = original[ColumnNames.SCREEN_HEIGHT][0]
+        screenWidth = original[ColumnNames.SCREEN_WIDTH][0]
+        data = normalize_coordinates_for_screen_size(original.copy(), ColumnNames.X, ColumnNames.Y, "per_axis", "pixels", pixelsX=screenWidth, pixelsY=screenHeight)
+        assert_series_equal(data[ColumnNames.X].astype(original[ColumnNames.Y].dtype), original[ColumnNames.X])
+        assert_series_equal(data[ColumnNames.Y].astype(original[ColumnNames.Y].dtype), original[ColumnNames.Y])
     # Test cases for Zoom normalization
 
     def test_wheel_one_step_in(self):
@@ -165,8 +202,6 @@ class TestNormalziation(unittest.TestCase):
         result = self.normalize_trace("SESSION_S")
         self.assertEqual(self.resize_labels(result), ["measured"])
         self.assert_final_state(result, 1 / 1.1, 979.0)
- 
-    # Reset back to 100%
  
     def test_key_reset_back_to_100(self):
         result = self.normalize_trace("SESSION_T")
