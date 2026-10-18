@@ -168,3 +168,35 @@ def backspace_usage_traces(traces: dict[str, list[pd.DataFrame]], validate: bool
             backspace_count += usage
         usage_by_session[session_id] = backspace_count
     return usage_by_session
+
+def word_per_minute(df: pd.DataFrame, word_size : int =5) -> float:
+    """
+    Computes the number of words typed per minute using a word size.
+    If not specified, the default word size is 5.
+
+    Parameters:
+        df (pd.DataFrame): DataFrame from which to compute the WPM
+        word_size (int?): Word size, by default 5.
+    """
+    return typing_speed_df(df, validate=True) / word_size
+
+
+def typing_speed_words_traces(traces: dict[str, list[pd.DataFrame]], validate: bool = True) -> dict[str, list[float]]:
+    """
+    Calculate the average typing speed in characters per minute (CPM) from pre-extracted keystroke traces.
+
+    Parameters:
+        traces (dict[str, list[pd.DataFrame]]): Pre-extracted keystroke traces by session.
+        validate (bool): Whether to validate the input DataFrames. Default is True.
+    Returns:
+        dict (dict[str, list[float]]): A dictionary with session IDs as keys and lists of typing speeds (CPM) per trace as values.
+    """
+    speed_by_session = {}
+    for session_id, keystroke_traces in traces.items():
+        speed_by_trace = []
+        for trace in keystroke_traces:
+            validate_dataframe_keyboard(trace)
+            cpm = typing_speed_df(trace, validate)
+            speed_by_trace.append(cpm)
+        speed_by_session[session_id] = speed_by_trace
+    return speed_by_session

@@ -9,7 +9,7 @@ import numpy as np
 from pywib.utils.segmentation import extract_keystroke_traces_by_session
 from pywib.utils import validate_dataframe_keyboard
 from pywib.constants import EventTypes, ColumnNames
-from pywib.utils.keyboard import (backspace_usage_df, backspace_usage_traces, typing_durations_df, typing_durations_traces, typing_speed_df, typing_speed_traces)
+from pywib.utils.keyboard import (backspace_usage_df, backspace_usage_traces, typing_durations_df, typing_durations_traces, typing_speed_df, typing_speed_traces, word_per_minute)
 from pywib.utils.validation import validate_any_not_none
 
 def typing_durations(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces: bool = True, single: bool = False) -> list:
@@ -129,3 +129,30 @@ def backspace_usage(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame
         return backspace_usage_df(df)
     
     return backspace_usage_traces(traces)
+
+def words_per_minute(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces : bool = True) -> dict[list[float]] | float:
+    """
+    Calculate the average typing speed in words per minute (WPM).
+
+    Parameters:
+        df (pd.DataFrame): DataFrame containing interaction data with 'event_type', 'timestamp', and 'key' columns.
+        traces (dict[str, list[pd.DataFrame]]): optional Pre-extracted keystroke traces by session.
+        per_traces (bool): optional Whether to calculate speed per trace. Default is True. if False, mind that the df must only contain typing data in order to obtain the correct CPM calculation.
+
+    Returns:
+        dict (dict[list[float]] | float) : A dictionary with session IDs as keys and lists of typing speeds (CPM) per trace as values, or a float representing the typing speed if per_traces is False.
+    """
+
+    validate_any_not_none(df, traces)
+
+    if per_traces and traces is None:
+        validate_dataframe_keyboard(df)
+        traces = extract_keystroke_traces_by_session(df)
+        return typing_speed_traces(traces, False)
+
+    elif not per_traces:
+        validate_dataframe_keyboard(df)
+        return word_per_minute(df)
+
+    # TODO create for traces
+    return word_per_minute(traces)
