@@ -138,7 +138,7 @@ class ColumnNames:
     """Column name for execution area under the curve in the interaction."""
     AAD = 'aad'
     """Column name for average absolute deviation in the interaction."""
-    MAD_MAX = 'mad_mad'
+    MAD_MAX = 'max_mad'
     """Column name for maximum absolute deviation in the interaction."""
     MIN_MAD = 'min_mad'
     """Column name for minimum absolute deviation in the interaction."""
