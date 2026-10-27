@@ -95,3 +95,18 @@ make html
 ```
 
 And then access `docs/build/html/index.html` to navigate.
+
+## PyWIB in other media
+<table>
+  <tr>
+    <td width="200" valign="top">
+      <a href="https://www.uniovi.es/en/actualidad/noticias/-/asset_publisher/Ru0cAJNPrm1m/content/id/16481191">
+        <img src="https://www.uniovi.es/o/adaptive-media/image/16481172/3/7949a2e8-4cae-2f2a-086f-5a73efd49985?t=1793088342362" alt="Article cover" width="200">
+      </a>
+    </td>
+    <td valign="top">
+      <h3><a href="https://yourblog.com/your-article">Dos investigadores de la Universidad de Oviedo desarrollan una herramienta gratuita que automatiza el análisis de la interacción persona-máquina</a></h3>
+      <sub>Oct 27, 2026</sub>
+    </td>
+  </tr>
+</table>
