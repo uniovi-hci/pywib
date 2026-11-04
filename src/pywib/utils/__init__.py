@@ -3,7 +3,7 @@ Utility functions for PyWib
 """
 
 from .validation import validate_dataframe, validate_dataframe_keyboard, validate_duplicate_timestamps, validate_traces
-from .segmentation import extract_traces_by_session, extract_mouse_click_traces_by_session, extract_mouse_click_traces_by_session_with_intial_pause
+from .segmentation import extract_traces_by_session, extract_mouse_click_traces_by_session, extract_mouse_click_traces_by_session_with_intial_pause, extract_keystroke_traces_by_session
 from .visualization import (visualize_trace, video_from_trace, keyboard_heatmap, FullTraceVisualization, 
                             InfoTraceVisualization, OptimalLineTraceVisualization, SimpleTraceVisualization,
                             StandardizedTraceVisualization, TraceVisualizationStrategy, TraceVisualizationType)
@@ -11,11 +11,13 @@ from .utils import compute_space_time_diff, compute_metrics_from_traces, to_pywi
 from .movement import (angular_velocity_df, angular_acceleration_df, _apply_metric_to_traces, acceleration_traces, velocity_traces, velocity_df, 
                        acceleration_df, jerkiness_df, jerkiness_traces, _path,
                        auc_ratio_traces, flips)
+from .normalization import normalize_zoom, normalize_coordinates_to_screen
 
 __all__ = [
     'validate_dataframe',
     'validate_dataframe_keyboard',
     'extract_traces_by_session',
+    'extract_keystroke_traces_by_session',
 
     'visualize_trace',
     'FullTraceVisualization', 
@@ -45,6 +47,8 @@ __all__ = [
     'angular_velocity_df',
     'angular_acceleration_df',
     '_apply_metric_to_traces',
-    'flips'
+    'flips',
 
+    'normalize_zoom',
+    'normalize_coordinates_to_screen'
 ]

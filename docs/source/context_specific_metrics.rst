@@ -39,11 +39,48 @@ Check if your tracking script supports this case and if it is of your interest t
 Reference: https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
 
 
-Keyboard ineraction in Touch devices vs Desktop devices
---------------------------------------------------------
+Keyboard Interaction in Touch Devices vs Desktop Devices
+-------------------------------------------------------
 
-Window Scrolling and Zooming
------------------------------
+When a user types by sliding a finger across a virtual keyboard without
+lifting it from the screen, the finger's path is not captured by the web
+page. Virtual keyboards such as Gboard, SwiftKey, and the iOS keyboard are
+separate applications rendered over the browser. Touches on the keyboard
+therefore do not generate pointer or touch events in the page, so the
+sliding path is not available to the tracking script.
+
+The page usually receives the completed word as text through composition and
+``input`` events. The exact keyboard events depend on the operating system,
+keyboard, and browser:
+
+* On Android with Chrome or Samsung Internet, Gboard generally uses
+  composition mode, including when letters are entered one at a time.
+  Keyboard events commonly report ``key="Unidentified"`` with key code 229,
+  often as a ``keydown``/``keyup`` pair for each change to the word being
+  composed rather than one event per letter.
+* On iPhone with Safari, individual taps may produce the actual letters in
+  keyboard events. With QuickPath (swipe typing), however, the word is
+  usually inserted as a single text change and keyboard events may not be
+  generated.
+
+Consequently, with the current agent, a word entered by swiping may produce
+only some ``keydown``/``keyup`` events with ``Unidentified`` on Android, no
+keyboard events on iPhone, or neither the entered text nor the finger's path.
+The path itself is not recoverable from these events.
+
+To record swipe-typed text, the tracking script should listen for ``input``
+and, optionally, ``compositionend`` events and store the inserted text and
+the type of insertion as a dedicated event. This would allow the log to
+represent an interaction such as “the word *hello* was inserted”, while still
+not providing the finger's route across the keyboard.
+
+
+
+Mobile VS Computer
+------------------
+
+Mobile users tend to perform a wider range of "movements" than computer users, as touchscreens allow a higher degree of freedom when interacting with them than traditional keyboards or computer mice.
+
 
 Total Distance
 --------------

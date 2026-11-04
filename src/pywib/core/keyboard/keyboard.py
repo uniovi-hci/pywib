@@ -93,10 +93,19 @@ def typing_speed_metrics(df: pd.DataFrame = None, traces: dict[str, list[pd.Data
             avg_speed = np.mean(speeds)
             total_chars = sum(session_traces[session_traces[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_UP][ColumnNames.EVENT_TYPE].count() for session_traces in traces[session_id])
             total_time = sum((session_traces[ColumnNames.TIME_STAMP].diff().fillna(0).sum() / 1000.0) for session_traces in traces[session_id])
-            avg_keydown_to_keyup_duration = np.mean([
-                (trace[trace[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_UP][ColumnNames.TIME_STAMP].values - trace[trace[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_DOWN][ColumnNames.TIME_STAMP].values).mean()
+            keydown_to_keyup_durations = [
+                keyup_time - keydown_time
                 for trace in traces[session_id]
-            ])
+                for keydown_time, keyup_time in zip(
+                    trace[trace[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_DOWN][ColumnNames.TIME_STAMP].values,
+                    trace[trace[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_UP][ColumnNames.TIME_STAMP].values,
+                )
+            ]
+            avg_keydown_to_keyup_duration = (
+                np.mean(keydown_to_keyup_durations)
+                if keydown_to_keyup_durations
+                else np.nan
+            )
             metrics_by_session[session_id] = {
                 "average_typing_speed": avg_speed,
                 ColumnNames.TOTAL_CHARS: total_chars,
