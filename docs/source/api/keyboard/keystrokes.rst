@@ -17,7 +17,7 @@ Practical Example
 .. code-block:: python
 
    from pywib import typing_speed
-   // Pre-obtained data_framed
+   # Pre-obtained data_framed
    speed = typing_speed(data_frame, per_traces=True)
 
    for session_id, speed_value in speed.items():
@@ -34,7 +34,7 @@ Practical Example
 .. code-block:: python
 
    from pywib import words_per_minute
-   // Pre-obtained data_framed
+   # Pre-obtained data_framed
    speed = words_per_minute(data_frame, per_traces=True)
 
    for session_id, speed_value in speed.items():
