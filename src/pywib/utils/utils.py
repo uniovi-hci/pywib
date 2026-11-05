@@ -107,7 +107,10 @@ def deprecated(func: Callable[pT, rT]) -> Callable[pT, rT]:
         return func(*args, **kwargs)
     return new_func
 
-def to_pywib_df(df: pd.DataFrame, colSessionId: str, colX: str, colY: str, colTimeStamp: str, colEventType: str, colKeyValue: str = None, colKeyCode: str = None) -> pd.DataFrame:
+def to_pywib_df(df: pd.DataFrame, colSessionId: str, colX: str, 
+                colY: str, colTimeStamp: str, colEventType: str, 
+                colKeyValue: str = None, colKeyCode: str = None,
+                colScreenWidth: str = None, colScreenHeight = None) -> pd.DataFrame:
     """
     Convert a DataFrame to the standard PyWib format.
 

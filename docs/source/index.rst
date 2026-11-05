@@ -25,6 +25,7 @@ Contents
    introduction
    constants
    data_structure
+   context_specific_metrics
    movement
    trajectory
    mouse

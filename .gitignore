@@ -3,4 +3,5 @@ dist
 .vscode/
 docs/build
 venv
+.venv
 .DS_Store
