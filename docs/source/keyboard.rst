@@ -32,6 +32,14 @@ This metric refers to the average number of characters typed per minute (CPM) by
 The function :py:func:`~pywib.typing_speed` calculates the average typing speed from a DataFrame containing keyboard interaction data. The DataFrame should include columns for event type (key press or key release), timestamps, and keys (session or user identifiers).
 With the function :py:func:`~pywib.typing_speed_metrics` the metrics returned include: average CPM, total characters typed, and total time spent typing.
 
+.. note::
+    The method :py:func:`~pywib.typing_speed` computes the active time typing, meaning that the resulting CPM maesures characters divided by the interval between the first and last keydown events, rather than by the entire session duration.
+
+Words Per minute
+~~~~~~~~~~~~~~~~
+Another common keystroke metric is the typed words per minute (WPM). Similar to CPM, it computes the number of words (groups of 5 characters by default, if the user does not specify a word size) typed by the user during his active typing time.
+The function :py:func:`~pywib.words_per_minute` computes the typing speed in WPM from a DataFrame containing keyboard interaction data. As stated before, this DataFrame should include the required columns for keystroke handling.
+
 Backspace Usage 
 ----------------
 The number of times a user presses the backspace key during a typing session can be a helpful metric to assess a negative emotional state and error correction behavior :cite:p:`Khanna2010-gn`.

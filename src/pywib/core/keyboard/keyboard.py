@@ -9,7 +9,7 @@ import numpy as np
 from pywib.utils.segmentation import extract_keystroke_traces_by_session
 from pywib.utils import validate_dataframe_keyboard
 from pywib.constants import EventTypes, ColumnNames
-from pywib.utils.keyboard import (backspace_usage_df, backspace_usage_traces, typing_durations_df, typing_durations_traces, typing_speed_df, typing_speed_traces, word_per_minute)
+from pywib.utils.keyboard import (backspace_usage_df, backspace_usage_traces, typing_durations_df, typing_durations_traces, typing_speed_df, typing_speed_traces, word_per_minute, word_per_minute_traces)
 from pywib.utils.validation import validate_any_not_none
 
 def typing_durations(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces: bool = True, single: bool = False) -> list:
@@ -91,7 +91,7 @@ def typing_speed_metrics(df: pd.DataFrame = None, traces: dict[str, list[pd.Data
     for session_id, speeds in session_speeds.items():
         if speeds:
             avg_speed = np.mean(speeds)
-            total_chars = sum(session_traces[session_traces[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_UP][ColumnNames.EVENT_TYPE].count() for session_traces in traces[session_id])
+            total_chars = sum(session_traces[session_traces[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_DOWN][ColumnNames.EVENT_TYPE].count() for session_traces in traces[session_id])
             total_time = sum((session_traces[ColumnNames.TIME_STAMP].diff().fillna(0).sum() / 1000.0) for session_traces in traces[session_id])
             avg_keydown_to_keyup_duration = np.mean([
                 (trace[trace[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_UP][ColumnNames.TIME_STAMP].values - trace[trace[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_DOWN][ColumnNames.TIME_STAMP].values).mean()
@@ -130,7 +130,7 @@ def backspace_usage(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame
     
     return backspace_usage_traces(traces)
 
-def words_per_minute(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces : bool = True) -> dict[list[float]] | float:
+def words_per_minute(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces : bool = True, word_size: int = 5) -> dict[list[float]] | float:
     """
     Calculate the average typing speed in words per minute (WPM).
 
@@ -138,21 +138,18 @@ def words_per_minute(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFram
         df (pd.DataFrame): DataFrame containing interaction data with 'event_type', 'timestamp', and 'key' columns.
         traces (dict[str, list[pd.DataFrame]]): optional Pre-extracted keystroke traces by session.
         per_traces (bool): optional Whether to calculate speed per trace. Default is True. if False, mind that the df must only contain typing data in order to obtain the correct CPM calculation.
-
+        word_size (int?): Word size, by default 5. 
     Returns:
         dict (dict[list[float]] | float) : A dictionary with session IDs as keys and lists of typing speeds (CPM) per trace as values, or a float representing the typing speed if per_traces is False.
     """
-
     validate_any_not_none(df, traces)
 
-    if per_traces and traces is None:
+    if not per_traces:
+        validate_dataframe_keyboard(df)
+        return word_per_minute(df, word_size)
+
+    if traces is None:
         validate_dataframe_keyboard(df)
         traces = extract_keystroke_traces_by_session(df)
-        return typing_speed_traces(traces, False)
 
-    elif not per_traces:
-        validate_dataframe_keyboard(df)
-        return word_per_minute(df)
-
-    # TODO create for traces
-    return word_per_minute(traces)
+    return word_per_minute_traces(traces, word_size)

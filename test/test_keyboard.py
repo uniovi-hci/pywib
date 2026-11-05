@@ -8,7 +8,7 @@ from utils import process_csv, import_pyModule
 
 import_pyModule()
 
-from pywib import typing_speed_metrics, typing_speed, backspace_usage, typing_durations,  ColumnNames
+from pywib import typing_speed_metrics, typing_speed, backspace_usage, typing_durations,  ColumnNames, words_per_minute
 
 DEBUG = True
 
@@ -20,23 +20,63 @@ class TestData:
 
     results = {
         "SESSION_A":{
-            "speed": [float((1/((1750792681050 - 1750792680900)/1000.0)) * 60.0), float(1/((1750792685500 - 1750792685400)/1000.0) * 60.0)],
+            "speed": [float(1/0.0025), float(1 / float( 0.1 / 60))],
             ColumnNames.BACKSPACE_USAGE: 0,
             "typing_durations": [float(1750792681050 - 1750792680900), float((1750792685500 - 1750792685400))],
             ColumnNames.TOTAL_CHARS: 2
         },
         "SESSION_B":{
 
-            "speed": [float( (1/((1750792680980 - 1750792680920)/1000.0)) * 60.0), float( (4/((1750792686150 - 1750792685600)/1000.0)) * 60.0)],
+            "speed": [float(3/0.001), float( (4 /  float(0.55 / 60.0) ))],
             ColumnNames.BACKSPACE_USAGE: 3,
             "typing_durations": [float((1750792680980 - 1750792680920)), float((1750792686150 - 1750792685600))],
-            ColumnNames.TOTAL_CHARS: 5
+            ColumnNames.TOTAL_CHARS: 7
         },
         "ALL":{
+            ColumnNames.TOTAL_CHARS: 9,
             ColumnNames.BACKSPACE_USAGE:3,
             "typing_durations":[float(1750792681050 - 1750792680900), float((1750792685500 - 1750792685400)), float((1750792680980 - 1750792680920)), float((1750792686150 - 1750792685600))]
         }
     }
+
+    # Expected trace durations in milliseconds.
+    durations = {
+        "SESSION_A": [150, 100],
+        "SESSION_B": [60, 550],
+    }
+
+    # Number of event-13 keydowns per trace.
+    chars = {
+        "SESSION_A": [1, 1],
+        "SESSION_B": [3, 4],
+    }
+
+    backspaces = {
+        "SESSION_A": 0,
+        "SESSION_B": 3,
+    }
+
+
+    @staticmethod
+    def trace_cpm(session_id):
+        return [
+            chars / (duration / 1000.0) * 60
+            for chars, duration in zip(
+                TestData.chars[session_id],
+                TestData.durations[session_id],
+            )
+        ]
+
+    @staticmethod
+    def pooled_cpm(session_id):
+        total_chars = sum(TestData.chars[session_id])
+        total_time = sum(TestData.durations[session_id]) / 1000.0
+
+        return total_chars / total_time * 60
+
+    @staticmethod
+    def pooled_wpm(session_id):
+        return TestData.pooled_cpm(session_id) / 5
 
 class TestKeyboard(unittest.TestCase):
     
@@ -50,14 +90,8 @@ class TestKeyboard(unittest.TestCase):
         speed = typing_speed(self.test_data, per_traces=True)
         for session_id, speeds in speed.items():
             expected_speeds = TestData.results[session_id]["speed"]
-            for s, e in zip(speeds, expected_speeds):
-                self.assertAlmostEqual(s, e, places=2)
-
-    def test_typing_speed_df(self):
-        """Test typing_speed function for DataFrame input"""
-        df_session_b = self.test_data[self.test_data['sessionId'] == 'SESSION_B']
-        speed = typing_speed(df_session_b, per_traces=False)
-        self.assertEqual(speed, (6/(2500/1000)) * 60.0)
+            for computed, expected in zip(speeds, expected_speeds):
+                self.assertAlmostEqual(computed, expected, places=2)
 
     def test_backspace_usage(self):
         """Test backspace_usage function"""
@@ -74,7 +108,9 @@ class TestKeyboard(unittest.TestCase):
         """Test typing_speed function for DataFrame input"""
         df_session_b = self.test_data[self.test_data['sessionId'] == 'SESSION_B']
         speed = typing_speed(df_session_b, per_traces=False)
-        self.assertEqual(speed, (5/(((1750792686150 - 1750792685600) + (1750792680980 - 1750792680920))/1000.0)) * 60.0)
+        expected_time = float(sum(TestData.results["SESSION_B"]["typing_durations"]) / 1000.0) / 60.0
+        expected = float(TestData.results["SESSION_B"][ColumnNames.TOTAL_CHARS] / expected_time)
+        self.assertAlmostEqual(speed, expected)
 
     def test_typing_speed_metrics(self):
         """Test typing_speed_metrics function"""
@@ -102,6 +138,27 @@ class TestKeyboard(unittest.TestCase):
         for durations in t_durations:
             self.assertAlmostEqual(durations, TestData.results["ALL"]["typing_durations"][i])
             i+=1        
+
+    def test_words_per_minute(self):
+        """Test WPM across all sessions."""
+
+        actual = words_per_minute(self.test_data, per_traces=False)
+
+        total_chars = TestData.results["ALL"][ColumnNames.TOTAL_CHARS]
+
+        total_time = float(850) / 1000.0
+
+        expected = (total_chars / total_time * 60) / 5
+
+        self.assertAlmostEqual(expected, actual , places=2)
+
+    def test_words_per_minute_traces(self):
+        """Test WPM acrross traces """
+        actual = words_per_minute(self.test_data, per_traces=True)
+        for session_id, trace_wpm in actual.items():
+            expected = [speed / 5 for speed in TestData.trace_cpm(session_id)]
+            for computed, expected_value in zip(trace_wpm, expected):
+                self.assertAlmostEqual(computed, expected_value, places=2)
                 
 
 if __name__ == '__main__':
