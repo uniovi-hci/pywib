@@ -202,7 +202,7 @@ class MobileTraceVisualization(StandardizedTraceVisualization):
     def apply(self, ax: plt.Axes, stroke_data, stroke_id: str):
         # Filter for events of mobile type
         stroke_data = stroke_data[stroke_data[ColumnNames.EVENT_TYPE].isin(EventTypes.MOBILE_EVENTS_LIST)]
-        super.apply(self, ax, stroke_data, stroke_id)
+        super().apply(ax, stroke_data, stroke_id)
 
 def get_visualization_strategy(viz_type, **kwargs) -> TraceVisualizationStrategy:
     """Factory function to get the appropriate visualization strategy based on the enum type or string."""
