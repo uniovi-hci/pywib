@@ -12,17 +12,26 @@ from pywib.constants import EventTypes, ColumnNames
 from pywib.utils.keyboard import (backspace_usage_df, backspace_usage_traces, typing_durations_df, typing_durations_traces, typing_speed_df, typing_speed_traces, word_per_minute, word_per_minute_traces)
 from pywib.utils.validation import validate_any_not_none
 
-def typing_durations(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces: bool = True, single: bool = False) -> list:
+def typing_durations(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces: bool = True, single: bool = False) -> list | float | dict[str, list[pd.DataFrame]]:
     """
     Calculate the durations of individual keystrokes.
 
     Parameters:
         df (pd.DataFrame): DataFrame containing interaction data with 'event_type', 'timestamp', and 'key' columns.
         traces (dict[str, list[pd.DataFrame]]): optional Pre-extracted keystroke traces by session.
-        per_traces (bool): optional whether to calculate durations per trace. Default is True.
-        single (bool): optional, wether to compute durations fully (all the time the user is typing) or for every single keystroke (value for every single key press and release combination)
-    Returns:
-        list[float]: List of keystroke durations in milliseconds.
+        per_traces (bool): True by default, whether to calculate durations per trace. Default is True.
+        single (bool): False by default, wether to compute durations fully (all the time the user is typing) or for every single keystroke (value for every single key press and release combination)
+        Returns:
+                Return type depends on ``per_traces`` and ``single``:
+
+                - per_traces=False, single=True -> list[float]:
+                    Keystroke durations in milliseconds.
+                - per_traces=False, single=False -> float:
+                    Total typing duration in milliseconds.
+                - per_traces=True, single=True -> dict[str, list[float]]:
+                    Session IDs mapped to per-trace keystroke durations.
+                - per_traces=True, single=False -> dict[str, float]:
+                    Session IDs mapped to total duration per trace.
     """
     
     validate_any_not_none(df, traces)
@@ -34,7 +43,7 @@ def typing_durations(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFram
 
     if not per_traces:
         validate_dataframe_keyboard(df)
-        return typing_durations_df(df)
+        return typing_durations_df(df, single=single)
 
     return typing_durations_traces(traces, single=single)
 

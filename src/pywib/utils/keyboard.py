@@ -24,20 +24,26 @@ def _typing_durations_per_key(df: pd.DataFrame) -> list[float]:
     Returns:
         list[float]: The times in ms of the typing trace
     """
-    durations = []
-    current_key = -1
-    time_start = 0.0
-    for _, event in df.iterrows():
-        if(current_key != event[ColumnNames.KEY_VALUE]):
-            current_key = event[ColumnNames.KEY_VALUE]
-            time_start = event[ColumnNames.TIME_STAMP]
-        else:
-            if(event[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_UP):
-                durations.append(event[ColumnNames.TIME_STAMP] - time_start)
+    durations: list[float] = []
+    key_down_times: dict[object, float] = {}
+
+    event_types = df[ColumnNames.EVENT_TYPE].to_numpy()
+    keys = df[ColumnNames.KEY_VALUE].to_numpy()
+    timestamps = df[ColumnNames.TIME_STAMP].to_numpy()
+
+    for event_type, key, timestamp in zip(event_types, keys, timestamps):
+        if event_type == EventTypes.EVENT_KEY_DOWN:
+            key_down_times[key] = timestamp
+        elif event_type == EventTypes.EVENT_KEY_UP:
+            start_time = key_down_times.get(key)
+            if start_time is not None:
+                durations.append(timestamp - start_time)
+                del key_down_times[key]
+
     return durations
 
 
-def typing_durations_df(df: pd.DataFrame = None, validate: bool = True, single:bool=False) -> list:
+def typing_durations_df(df: pd.DataFrame = None, validate: bool = True, single:bool=False) -> list | float:
     """
     Calculate the durations of individual keystrokes from a DataFrame.
 
@@ -46,21 +52,26 @@ def typing_durations_df(df: pd.DataFrame = None, validate: bool = True, single:b
         validate (bool): Whether to validate the input DataFrame. Default is True.
         single (bool): Wether to compute per single key press or by full keystroke interaction.
     Returns:
-        list: List of keystroke durations in milliseconds.
+        list: List of keystroke durations in milliseconds if single is True.
+        float: Total duration of the typing session in milliseconds if single is False.
     """
     if validate:
         validate_dataframe_keyboard(df)
     durations = []
+    total_duration = 0.0
     traces = extract_keystroke_traces(df)
     
     for trace in traces:
         if single:
-            durations.append(_typing_durations_per_key(trace))
+            durations.extend(_typing_durations_per_key(trace))
         else:
-            durations += _typing_durations_full(trace)
+            total_duration += _typing_durations_full(trace)
+
+    if not single:
+        return total_duration
     return durations
 
-def typing_durations_traces(traces: dict[str, list[pd.DataFrame]], validate: bool = True, single: bool = False) -> dict[str, list[pd.DataFrame]]:
+def typing_durations_traces(traces: dict[str, list[pd.DataFrame]], validate: bool = True, single: bool = False) -> dict[str, list[float]] | dict[str, float]:
     """
     Calculate the durations of individual keystrokes from pre-extracted keystroke traces.
 
@@ -69,18 +80,23 @@ def typing_durations_traces(traces: dict[str, list[pd.DataFrame]], validate: boo
         validate (bool): Whether to validate the input DataFrames. Default is True.
         single (bool): Wether to compute per single key press or by full keystroke interaction.
     Returns:
-        dict (dict[str, list[number]]): A dictionary with session IDs as keys and lists of keystroke durations per trace as values.
+        dict (dict[str, list[float]]): A dictionary with session IDs as keys and lists of keystroke durations per trace as values if single is true.
+        dict (dict[str, float]): A dictionary with session IDs as keys and total durations per trace as values if single is false.
     """
     durations_per_session = {}
     for session_id, keystroke_traces in traces.items():
         durations = []
+        total_duration = 0.0
         for trace in keystroke_traces:
             validate_dataframe_keyboard(trace)
             if single:
-                durations.append(_typing_durations_full(trace))
+                durations.extend(_typing_durations_per_key(trace))
             else:
-                durations += _typing_durations_full(trace)
-        durations_per_session[session_id] = durations
+                total_duration += _typing_durations_full(trace)
+        if single:
+            durations_per_session[session_id] = durations
+        else:
+            durations_per_session[session_id] = total_duration
     return durations_per_session
 
 def typing_speed_df(df: pd.DataFrame = None, validate: bool = True) -> float:
