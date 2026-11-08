@@ -109,4 +109,12 @@ And then access `docs/build/html/index.html` to navigate.
       <sub>Oct 27, 2026</sub>
     </td>
   </tr>
+  <tr>
+    <td width="200" valign="top">
+        Interview on Cadena SER Gijón
+    </td>
+   <td valign="top">
+      <a href="https://cadenaser.com/embed/audio/460/ser_asturias_avivirquesondosdiasasturias_20261107_130418_140000/" target="_balank" rel="noopener">▶ Listen to the interview on Cadena SER at minute 26:20</a>
+    </td>
+  </tr>
 </table>
