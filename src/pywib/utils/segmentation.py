@@ -2,7 +2,6 @@ from typing import List
 
 import pandas as pd
 
-from pywib.utils.cleanup import remove_init_tracking_events
 from ..constants import EventTypes, ColumnNames
 from ..utils.validation import validate_dataframe, validate_dataframe_keyboard
 
@@ -14,7 +13,6 @@ def extract_trace(df: pd.DataFrame) -> list:
     Returns a list of DataFrames, each corresponding to a trace.
     """
     validate_dataframe(df)
-    df = remove_init_tracking_events(df).copy()
     df = df.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
     return _extract_move_trace(df)
 
@@ -30,7 +28,6 @@ def extract_traces_by_session(df: pd.DataFrame) -> dict:
         dict: a dictionary with keys as (sessionId) and values as lists of DataFrames.
     """
     validate_dataframe(df)
-    df = remove_init_tracking_events(df).copy()
     df = df.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
     traces_by_session = {}
     for session_id, group in df.groupby(ColumnNames.SESSION_ID):
@@ -48,7 +45,6 @@ def extract_keystroke_traces(df: pd.DataFrame) -> list[pd.DataFrame]:
         lsit[pd.DataFrame]: A list contanining the traces.
     """
     validate_dataframe_keyboard(df)
-    df = remove_init_tracking_events(df).copy()
     df = df.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
     is_key_event = df[ColumnNames.EVENT_TYPE].isin([
             EventTypes.EVENT_KEY_UP,
@@ -68,7 +64,6 @@ def extract_keystroke_traces_by_session(df: pd.DataFrame) -> dict[str, list[pd.D
         dict: a dictionary with keys as (sessionId) and values as lists of DataFrames.
     """
     validate_dataframe_keyboard(df)
-    df = remove_init_tracking_events(df).copy()
     df = df.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
     keystroke_traces_by_session = {}
     for session_id, group in df.groupby(ColumnNames.SESSION_ID):
@@ -83,7 +78,6 @@ def extract_mouse_click_traces_by_session(dt: pd.DataFrame) -> dict:
     grouped by sessionId.
     """
     validate_dataframe(dt)
-    df = remove_init_tracking_events(df).copy()
     dt = dt.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
     click_traces_by_session = {}
     for session_id, group in dt.groupby(ColumnNames.SESSION_ID):
@@ -108,7 +102,6 @@ def extract_mouse_click_traces_by_session(dt: pd.DataFrame) -> dict:
 
 def extract_mouse_click_traces_by_session_with_intial_pause(df: pd.DataFrame, pause_threshold: float = 200) -> dict:
     df = df.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
-    df = remove_init_tracking_events(df).copy()
     click_traces_by_session = {}
     for session_id, group in df.groupby(ColumnNames.SESSION_ID):
         is_move = (group[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_ON_MOUSE_MOVE) | (group[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_ON_POINTER_MOVE)
