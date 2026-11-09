@@ -4,7 +4,8 @@ import numpy as np
 from pywib.utils import (_path, validate_dataframe, compute_space_time_diff, 
                          extract_traces_by_session, 
                          auc_ratio_traces)
-from pywib.constants import ColumnNames
+from pywib.constants import ColumnNames, EventTypes
+from pywib.utils.cleanup import remove_init_tracking_events, remove_unpositioned_events
 from pywib.utils.movement import (auc_df, auc_traces, flips, _apply_metric_to_traces,
                                    _compute_angles, angular_acceleration_df, angular_velocity_df)
 from pywib.utils.utils import deprecated
@@ -341,19 +342,30 @@ def angular_acceleration(df: pd.DataFrame = None, traces: dict[str, list[pd.Data
     return traces
 
 
-def direction_changes(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces: bool = False) -> pd.DataFrame | dict:
+def direction_changes(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces: bool = False, per_user: bool = False, threshold : int = (np.pi / 4)) -> pd.DataFrame | dict[str, list[int]]:
     """
         Calculate the number of direction changes in the given DataFrame.
         
         Parameters:
             df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
             traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
-            per_traces (bool): Whether to return the result for each trace separately. If False, returns the total count as an integer.
+            per_traces (bool?): Defaults to False. Whether to return the result for each trace separately. If False, returns the total count as an integer.
+            per_user (bool?): Defaults to False. If True, then it computes the number of direction changes for each user. The main difference with per traces is that this option does not segment the DataFrame, computing the total number of changes through the DataFrame.
+
+        Returns:
+            int (int): An integer if `per_traces` and `per_user` is False.
+            dict (dict[str,list[int]]): A dictionary if `per_traces` is True **or** if `per_user` is True, with sessionIds as keys and the number of direction changes on each trace as an integer.
+
     """
 
     validate_any_not_none(df, traces)
 
-    if not per_traces and df is not None:
+    if df is not None:
+        df = remove_init_tracking_events(df).copy()
+        if (not per_traces) or per_user:
+            df = remove_unpositioned_events(df).copy()
+
+    if not per_traces and not per_user and df is not None:
         df = compute_space_time_diff(df)
         # Compute directly on the DataFrame (no trace extraction
         directions = np.arctan2(df[ColumnNames.DY], df[ColumnNames.DX])
@@ -365,23 +377,54 @@ def direction_changes(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFra
         direction_changes = np.sum(np.abs(angle_diff) > np.pi / 4)  # Consider a change if the angle changes more than 45 degrees
         return direction_changes
 
-    if traces is None and per_traces:
+    if traces is None and (per_traces or per_user):
         validate_dataframe(df)
         traces = extract_traces_by_session(df)
 
     direction_changes_per_trace = {}
     for session_id, session_traces in traces.items():
+        direction_changes_per_trace[session_id] = []
         for trace in session_traces:
             trace = compute_space_time_diff(trace)
-            directions = np.arctan2(trace[ColumnNames.DY], trace[ColumnNames.DX])
-            angle_diff = np.diff(directions)
-            angle_diff = np.arctan2(np.sin(angle_diff), np.cos(angle_diff))
-            direction_changes = np.sum(np.abs(angle_diff) > np.pi / 4)  # Consider a change if the angle changes more than 45 degrees
-            direction_changes_per_trace[session_id] = direction_changes
+            dx = trace[ColumnNames.DX].to_numpy()
+            dy = trace[ColumnNames.DY].to_numpy()
+            direction_changes = count_direction_changes(dx, dy, threshold) # Consider a change if the angle changes more than the threshold (pi/4)
+            direction_changes_per_trace[session_id].append(direction_changes)
     
     return direction_changes_per_trace
 
-def x_flips(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, threshold: float = 0.1, per_traces: bool = False) -> int | dict:
+def count_direction_changes(dx: np.ndarray, dy: np.ndarray, threshold=np.pi / 4):
+    """
+    Helper method that counts the number of direction changes given the computed dx and dy arrays.
+
+    Parameters:
+        dx (np.ndarray): Horizontal displacement values.
+        dy (np.ndarray): Vertical displacement values.
+        threshold (float, optional): Minimum absolute angle change, in radians,
+            required to count as a direction change. Defaults to pi / 4.
+
+    Returns:
+        int: Number of direction changes.
+    """
+    directions = np.arctan2(dy, dx)
+
+    # Remove zero-length displacement vectors
+    valid = (dx != 0) | (dy != 0)
+    directions = directions[valid]
+
+    if len(directions) < 2:
+        return 0
+
+    angle_diff = np.diff(directions)
+
+    angle_diff = np.arctan2(
+        np.sin(angle_diff),
+        np.cos(angle_diff)
+    )
+
+    return np.sum(np.abs(angle_diff) > threshold)
+
+def x_flips(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, threshold: float = 0.1, per_traces: bool = False, per_user: bool = False) -> int | dict[str, list[int]]:
     """
     Calculate the number of x-direction flips in the given DataFrame.
     
@@ -393,13 +436,21 @@ def x_flips(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = Non
         df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
         traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
         threshold (float): The threshold for considering a flip.
-        per_traces (bool): Whether to return the result for each trace separately. If False, returns the total count as an integer.
+        per_traces (bool?): Defaults to False. Whether to return the result for each trace separately. If False, returns the total count as an integer.
+        per_user (bool?): Defaults to False. If True, then it computes the number of direction changes for each user. The main difference with per traces is that this option does not segment the DataFrame, computing the total number of changes through the DataFrame.
+
     Returns:
-        int | dict: The number of x-direction flips or a dictionary with the count for each session.
+        int: The number of x-direction flips or a dictionary with the count for each session if `per_traces` and `per_user` are False.
+        dict (dict[str,list[int]]): A dictionary if `per_traces` is True **or** if `per_user` is True, with sessionIds as keys and the number of direction changes on each trace as an integer.
     """
     validate_any_not_none(df, traces)
 
-    if not per_traces:
+    if df is not None:
+            df = remove_init_tracking_events(df).copy()
+            if (not per_traces) or per_user:
+                df = remove_unpositioned_events(df).copy()
+
+    if not per_traces and not per_user:
         validate_dataframe(df)
         if (ColumnNames.DX not in df.columns):
             df = compute_space_time_diff(df)
@@ -419,7 +470,7 @@ def x_flips(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = Non
 
     return flips_per_session
 
-def y_flips(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, threshold: float = 0.1, per_traces: bool = False) -> int | dict:
+def y_flips(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, threshold: float = 0.1, per_traces: bool = False, per_user: bool = False) -> int | dict:
     """
     Calculate the number of y-direction flips in the given DataFrame.
 
@@ -431,13 +482,20 @@ def y_flips(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = Non
         df (pd.DataFrame): DataFrame containing 'x' and 'y' columns.
         traces (dict): A dictionary with keys as (sessionId) and values as lists of DataFrames. If None, traces will be computed from df.
         threshold (float): The threshold for considering a flip.
-        per_traces (bool): Whether to return the result for each trace separately. If False, returns the total count as an integer.
+        per_traces (bool?): Defaults to False. Whether to return the result for each trace separately. If False, returns the total count as an integer.
+        per_user (bool?): Defaults to False. If True, then it computes the number of direction changes for each user. The main difference with per traces is that this option does not segment the DataFrame, computing the total number of changes through the DataFrame.
+        
     Returns:
         int | dict: The number of y-direction flips or a dictionary with the count for each session.
     """
     validate_any_not_none(df, traces)
+    
+    if df is not None:
+            df = remove_init_tracking_events(df).copy()
+            if (not per_traces) or per_user:
+                df = remove_unpositioned_events(df).copy()
 
-    if not per_traces:
+    if not per_traces and not per_user:
         validate_dataframe(df)
         if (ColumnNames.DY not in df.columns):
             df = compute_space_time_diff(df)
