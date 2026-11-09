@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 import sys
 import os
+import pandas as pd
 import pytest
 sys.path.insert(0, os.path.dirname(__file__))
 from utils import process_csv, import_pyModule
@@ -15,8 +16,10 @@ DEBUG = True
 class TestData:
     if(DEBUG):
         dataFile = 'test/test_data/test_mouse_keyboard.csv'
+        dataFile2 = 'test/test_data/test_keyboard_simple.csv'
     else:
         dataFile = 'pywib/test/test_data/test_mouse_keyboard.csv'
+        dataFile2 = 'pywib/test/test_data/test_keyboard_simple.csv'
 
     results = {
         "SESSION_A":{
@@ -35,7 +38,7 @@ class TestData:
         "ALL":{
             ColumnNames.TOTAL_CHARS: 9,
             ColumnNames.BACKSPACE_USAGE:3,
-            "typing_durations":[float(1750792681050 - 1750792680900), float((1750792685500 - 1750792685400)), float((1750792680980 - 1750792680920)), float((1750792686150 - 1750792685600))]
+            "typing_durations":[float(1750792681050 - 1750792680900), float((1750792686000 - 1750792685400)), float((1750792686150 - 1750792686050))]
         }
     }
 
@@ -84,6 +87,7 @@ class TestKeyboard(unittest.TestCase):
         """Set up test data"""
         # Create sample test data instead of relying on external CSV
         self.test_data = process_csv(TestData.dataFile)
+        self.test_data_simple = process_csv(TestData.dataFile2)
         
     def test_typing_speed(self):
         """Test typing_speed function"""
@@ -124,20 +128,14 @@ class TestKeyboard(unittest.TestCase):
 
     def test_typing_durations(self):
         """Test typing durations function"""
-        t_durations = typing_durations(self.test_data, per_traces=True)
-        for session_id, durations in t_durations.items():
-            i = 0
-            for duration in durations:          
-                self.assertAlmostEqual(duration, TestData.results[session_id]["typing_durations"][i])
-                i+=1
+        t_durations = typing_durations(self.test_data, per_traces=True, single=False)
+        for session_id, duration in t_durations.items():
+            self.assertAlmostEqual(duration, sum(TestData.results[session_id]["typing_durations"]))
 
     def test_typing_durations_df(self):
         """Test typing durations function for a single DataFrame"""
-        t_durations = typing_durations(self.test_data, per_traces=False)
-        i = 0
-        for durations in t_durations:
-            self.assertAlmostEqual(durations, TestData.results["ALL"]["typing_durations"][i])
-            i+=1        
+        t_durations = typing_durations(self.test_data, per_traces=False, single=False)
+        self.assertAlmostEqual(t_durations, sum(TestData.results["ALL"]["typing_durations"]))      
 
     def test_words_per_minute(self):
         """Test WPM across all sessions."""
@@ -159,7 +157,23 @@ class TestKeyboard(unittest.TestCase):
             expected = [speed / 5 for speed in TestData.trace_cpm(session_id)]
             for computed, expected_value in zip(trace_wpm, expected):
                 self.assertAlmostEqual(computed, expected_value, places=2)
-                
+    
+    def test_typing_durations_non_empty(self):
+        df = self.test_data_simple.copy()
+        self.assertTrue(len(typing_durations(df)) > 0)
+
+    def test_typing_durations_single(self):
+        df = self.test_data_simple.copy()
+        durations = typing_durations(df, per_traces=True, single=True)
+        self.assertEqual(len(durations["K"]), 2)
+        self.assertEqual(durations["K"][0], [50])
+        self.assertEqual(durations["K"][1], [60])
+
+    def test_typing_durations_single(self):
+        df = self.test_data_simple.copy()
+        durations = typing_durations(df, per_traces=False, single=True)
+        self.assertEqual(durations[0], [50])
+        self.assertEqual(durations[1], [60])
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,5 @@
+eventType,timeStamp,x,y,keyValue,keyCode,sessionId
+13,0,-1,-1,a,-1,K
+15,50,-1,-1,a,-1,K
+13,200,-1,-1,b,-1,K
+15,260,-1,-1,b,-1,K
