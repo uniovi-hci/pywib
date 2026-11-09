@@ -21,14 +21,22 @@ def validate_any_not_none(*params):
 
 def validate_dataframe(df: pd.DataFrame):
     """
-    Validates that all required columns are pressent in the DataFrame.
-    Valdiates that there are no repeated columns.
+    Validates that all required columns are present in the DataFrame
+    and that no column name is repeated.
+
+    Raises:
+        ValueError: If any required column is missing, or if any column name is repeated.
     """
-    for col in required_columns:
-        if col not in df.columns:
-            raise ValueError(f"Missing required column: {col}")
-        if df.index.has_duplicates or df.columns.duplicated().any():
-            raise ValueError (f"Columns can not be repeated in the DataFrame: {df.columns[df.columns.duplicated()].tolist()}")
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if missing_columns:
+        raise ValueError(f"Missing required column(s): {missing_columns}")
+
+    duplicated_columns = df.columns[df.columns.duplicated()].unique().tolist()
+    if duplicated_columns:
+        raise ValueError(f"Columns can not be repeated in the DataFrame: {duplicated_columns}")
+    
+    if df.index.has_duplicates:
+        raise ValueError("The DataFrame index must be unique. Use df.reset_index(drop=True) before processing.")
         
         
 def validate_dataframe_keyboard(df: pd.DataFrame):

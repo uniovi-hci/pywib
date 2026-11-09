@@ -1,7 +1,7 @@
 """
 """
 
-__version__ = "2.1.0"
+__version__ = "3.0.0"
 __author__ = "Guillermo Dylan Carvajal Aza"
 __email__ = "carvajalguillermo@uniovi.es"
 
@@ -18,7 +18,7 @@ from .core import (velocity, acceleration, jerkiness, path, auc,
                    click_slip, num_pauses, deviations,
                      typing_speed_metrics, typing_speed, backspace_usage, typing_durations,
                      angle, angular_velocity, angular_acceleration, direction_changes, curvature,
-                     x_flips, y_flips, straigthness, total_distance)
+                     x_flips, y_flips, straigthness, total_distance, words_per_minute)
 
 __all__ = [
     # Version info
@@ -78,6 +78,7 @@ __all__ = [
     "typing_speed_metrics",
     "backspace_usage",
     "typing_durations",
+    "words_per_minute",
 
     # Timing
     "pauses_metrics",
