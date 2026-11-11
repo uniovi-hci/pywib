@@ -1,22 +1,23 @@
 from typing import List
 
 import pandas as pd
+
 from ..constants import EventTypes, ColumnNames
 from ..utils.validation import validate_dataframe, validate_dataframe_keyboard
 
-def extract_trace(dt: pd.DataFrame) -> list:
+def extract_trace(df: pd.DataFrame) -> list:
     """
     Extracts trace from the DataFrame.
     Each trace is considered as a sequence of consecutive ON_MOUSE_MOVE events
     between two non-move events.
     Returns a list of DataFrames, each corresponding to a trace.
     """
-    validate_dataframe(dt)
-    dt = dt.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
-    return _extract_move_trace(dt)
+    validate_dataframe(df)
+    df = df.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
+    return _extract_move_trace(df)
 
 
-def extract_traces_by_session(dt: pd.DataFrame) -> dict:
+def extract_traces_by_session(df: pd.DataFrame) -> dict:
     """
     Extracts traces from the DataFrame, grouped by (sessionId, sceneId).
     Each trace is considered as a sequence of consecutive ON_MOUSE_MOVE events
@@ -26,10 +27,10 @@ def extract_traces_by_session(dt: pd.DataFrame) -> dict:
     Returns:
         dict: a dictionary with keys as (sessionId) and values as lists of DataFrames.
     """
-    validate_dataframe(dt)
-    dt = dt.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
+    validate_dataframe(df)
+    df = df.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
     traces_by_session = {}
-    for session_id, group in dt.groupby(ColumnNames.SESSION_ID):
+    for session_id, group in df.groupby(ColumnNames.SESSION_ID):
         traces_by_session[session_id] = _extract_move_trace(group)
     return traces_by_session
 
@@ -99,10 +100,10 @@ def extract_mouse_click_traces_by_session(dt: pd.DataFrame) -> dict:
         click_traces_by_session[session_id] = click_traces
     return click_traces_by_session
 
-def extract_mouse_click_traces_by_session_with_intial_pause(dt: pd.DataFrame, pause_threshold: float = 200) -> dict:
-    dt = dt.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
+def extract_mouse_click_traces_by_session_with_intial_pause(df: pd.DataFrame, pause_threshold: float = 200) -> dict:
+    df = df.sort_values(by=ColumnNames.TIME_STAMP).reset_index(drop=True)
     click_traces_by_session = {}
-    for session_id, group in dt.groupby(ColumnNames.SESSION_ID):
+    for session_id, group in df.groupby(ColumnNames.SESSION_ID):
         is_move = (group[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_ON_MOUSE_MOVE) | (group[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_ON_POINTER_MOVE)
         group_id = (~is_move).cumsum()
         click_traces = []

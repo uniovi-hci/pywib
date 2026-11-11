@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from utils import assert_between_zero_inf, process_csv, import_pyModule, build_trajectory_df
 
 import_pyModule()
-from pywib import (ColumnNames, extract_traces_by_session, auc, x_flips, y_flips, deviations, angle, 
+from pywib import (ColumnNames, extract_traces_by_session, auc, x_flips, y_flips, direction_changes, deviations, angle, 
                    angular_velocity, angular_acceleration, path, total_distance, visualize_trace)
 from pywib.utils.movement import trajectory as traj_mod
 
@@ -137,13 +137,13 @@ class TestTrajectory(unittest.TestCase):
         self.assertGreaterEqual(flips, 0)
         self.assertEqual(flips, 6)
 
-    def test_x_flips_per_trace(self):
-        flips = x_flips(self.test_data_flips_single.copy(), per_traces=True)
+    def test_x_flips_per_user(self):
+        flips = x_flips(self.test_data_flips_single.copy(), per_traces=False, per_user=True)
         self.assertGreaterEqual(flips.get("SESSION_A"), 0)
         self.assertEqual(flips.get("SESSION_A"), 8)
 
-    def test_y_flips_per_trace(self):
-        flips = y_flips(self.test_data_flips_single.copy(), per_traces=True)
+    def test_y_flips_per_user(self):
+        flips = y_flips(self.test_data_flips_single.copy(), per_traces=False, per_user=True)
         self.assertGreaterEqual(flips.get("SESSION_A"), 0)
         self.assertEqual(flips.get("SESSION_A"), 6)
     
@@ -162,6 +162,22 @@ class TestTrajectory(unittest.TestCase):
         self.assertEqual(flips.get("SESSION_A"), 6)
         self.assertGreaterEqual(flips.get("SESSION_B"), 0)
         self.assertEqual(flips.get("SESSION_B"), 6)
+
+    
+    def test_direction_changes_per_traces(self):
+        changes = direction_changes(self.test_data_flips_single.copy(), None, True)
+        for _, values in changes.items():
+            self.assertEqual(sum(values), 12)
+
+    def test_direction_changes_per_user(self):
+        changes = direction_changes(self.test_data_flips_single.copy(), None, True, True)
+        for _, values in changes.items():
+            self.assertEqual(sum(values), 14)
+
+
+    def test_direction_changes(self):
+        changes = direction_changes(self.test_data_flips_single.copy(), None, False)
+        self.assertEqual(changes, 14)
 
     def test_deviations_greaterThanZero(self):
         """
