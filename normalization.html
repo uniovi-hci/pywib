@@ -1,0 +1,834 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html">
+
+    <link rel="shortcut icon" href="_static/favicon.ico"><!-- Generated with Sphinx 8.1.3 and Furo 2025.12.19 -->
+        <title>Coordinate Normalization - PyWIB 3.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=5ae546fa" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">PyWIB 3.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <span class="sidebar-brand-text">PyWIB 3.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#installation-and-getting-started">Installation and Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constants.html">Constants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_structure.html">Data structures required to use PyWIB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context_specific_metrics.html">Context Specific Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="movement.html">Movement Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trajectory.html">Trajectory Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mouse.html">Mouse Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keyboard.html">Keystroke Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timing.html">Timing Metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="segmentation.html">Segmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="patterns.html">Mouse Behavioral Patterns</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/index.html">API Documentation</a><input aria-label="Toggle navigation of API Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/movement/index.html">Movement Functions</a><input aria-label="Toggle navigation of Movement Functions" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/velocity.html">Velocity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/velocity.html#velocity-metrics">Velocity Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/acceleration.html">Acceleration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/acceleration.html#acceleration-metrics">Acceleration Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/jerkiness.html">Jerkiness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/jerkiness.html#jerkiness-metrics">Jerkiness Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/angle.html">Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/angle.html#angular-velocity">Angular Velocity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/movement/angle.html#angular-acceleration">Angular Acceleration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/mouse/clicks.html">Clicks</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/trajectory/index.html">Trajectory Functions</a><input aria-label="Toggle navigation of Trajectory Functions" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/trajectory/path.html">Distance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/trajectory/auc.html">Area Under the Curve</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/trajectory/deviations.html">Deviations from trajectory</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/keyboard/index.html">Keystroke Functions</a><input aria-label="Toggle navigation of Keystroke Functions" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/keyboard/keystrokes.html">Keystroke Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/timing/index.html">Timing Functions</a><input aria-label="Toggle navigation of Timing Functions" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/timing/pauses.html">Pauses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/timing/time.html">Timing</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="api/utils/index.html">Other utility Functions</a><input aria-label="Toggle navigation of Other utility Functions" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/utils/visualization.html">Visualization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/utils/data_processing.html">Data Processing Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/normalization.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="coordinate-normalization">
+<h1>Coordinate Normalization<a class="headerlink" href="#coordinate-normalization" title="Link to this heading">¶</a></h1>
+<p>This utility makes pointer coordinates comparable across sessions that were
+recorded under different conditions. It provides two independent steps:</p>
+<ol class="arabic simple">
+<li><p><strong>Zoom normalization</strong> (<code class="docutils literal notranslate"><span class="pre">normalize_zoom</span></code> / <code class="docutils literal notranslate"><span class="pre">normalize_zoom_sessions</span></code>):
+undoes the effect of browser zoom (Ctrl +, Ctrl -, Ctrl 0, Ctrl + wheel) so
+that coordinates are expressed as if the page had always been at the initial
+zoom level.</p></li>
+<li><p><strong>Screen-size normalization</strong> (<code class="docutils literal notranslate"><span class="pre">normalize_coordinates_to_screen</span></code>):
+rescales coordinates by the screen size so that sessions recorded on
+different resolutions (and devices) can be compared.</p></li>
+</ol>
+<nav class="contents local" id="contents">
+<p class="topic-title">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#overview" id="id3">Overview</a></p></li>
+<li><p><a class="reference internal" href="#zoom-normalization" id="id4">Zoom normalization</a></p>
+<ul>
+<li><p><a class="reference internal" href="#how-it-works" id="id5">How it works</a></p></li>
+<li><p><a class="reference internal" href="#discrete-zoom-levels" id="id6">Discrete zoom levels</a></p></li>
+<li><p><a class="reference internal" href="#api" id="id7">API</a></p></li>
+<li><p><a class="reference internal" href="#diagnostic-columns" id="id8">Diagnostic columns</a></p></li>
+<li><p><a class="reference internal" href="#helper-functions" id="id9">Helper functions</a></p></li>
+<li><p><a class="reference internal" href="#limitations" id="id10">Limitations</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#screen-size-normalization" id="id11">Screen-size normalization</a></p>
+<ul>
+<li><p><a class="reference internal" href="#id1" id="id12">API</a></p></li>
+<li><p><a class="reference internal" href="#normalization-modes" id="id13">Normalization modes</a></p></li>
+<li><p><a class="reference internal" href="#why-diagonal-does-not-fill-0-1" id="id14">Why <code class="docutils literal notranslate"><span class="pre">diagonal</span></code> does not fill 0-1</a></p></li>
+<li><p><a class="reference internal" href="#what-happens-when-the-aspect-ratio-differs" id="id15">What happens when the aspect ratio differs</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#recommendations" id="id16">Recommendations</a></p></li>
+<li><p><a class="reference internal" href="#caveats-and-pitfalls" id="id17">Caveats and pitfalls</a></p></li>
+</ul>
+</nav>
+<section id="overview">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Remove the effect of browser zoom (each session is processed on its own)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">normalize_zoom_sessions</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">browser_name</span><span class="o">=</span><span class="s2">"chrome"</span><span class="p">)</span>
+
+<span class="c1"># 2. Rescale by screen size (each session uses its own screen size)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">normalize_coordinates_to_screen</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"diagonal"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Order matters.</strong> Always apply zoom normalization <em>before</em> screen-size
+normalization. The zoom algorithm measures ratios between pixel positions
+and discards measurements whose x value is below <code class="docutils literal notranslate"><span class="pre">min_valid_x</span></code> (100 px by
+default). After screen normalization x lies roughly in the range 0-1, so
+every measurement would be discarded.</p>
+</div>
+</section>
+<section id="zoom-normalization">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Zoom normalization</a><a class="headerlink" href="#zoom-normalization" title="Link to this heading">¶</a></h2>
+<section id="how-it-works">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">How it works</a><a class="headerlink" href="#how-it-works" title="Link to this heading">¶</a></h3>
+<p>When the user zooms, the browser fires a <code class="docutils literal notranslate"><span class="pre">resize</span></code> event and the page
+coordinates (<code class="docutils literal notranslate"><span class="pre">pageX</span></code> / <code class="docutils literal notranslate"><span class="pre">pageY</span></code>) are rescaled by the ratio between the old
+and the new zoom level. The algorithm reconstructs the zoom level over time:</p>
+<ol class="arabic simple">
+<li><p>Events related to zoom (wheel/scroll events, window resize events and zoom
+keys such as <code class="docutils literal notranslate"><span class="pre">+</span></code>, <code class="docutils literal notranslate"><span class="pre">-</span></code>, <code class="docutils literal notranslate"><span class="pre">0</span></code>) are grouped into <strong>bursts</strong>. A new burst
+starts when the gap between two consecutive zoom-related events is larger
+than <code class="docutils literal notranslate"><span class="pre">max_gap_ms</span></code>. Only bursts that contain at least one resize event are
+kept.</p></li>
+<li><p>For each burst, the zoom steps are resolved in one of two ways:</p>
+<ul class="simple">
+<li><p><strong>Key zoom</strong> (<code class="docutils literal notranslate"><span class="pre">key</span></code>) – if the number of zoom keys equals the number of
+resize events, each key gives the direction of one step (<code class="docutils literal notranslate"><span class="pre">in</span></code>, <code class="docutils literal notranslate"><span class="pre">out</span></code>
+or <code class="docutils literal notranslate"><span class="pre">reset</span></code>) and the new level is the next/previous level in the
+browser’s list of discrete zoom steps.</p></li>
+<li><p><strong>Measured zoom</strong> (<code class="docutils literal notranslate"><span class="pre">measured</span></code>) – the direction is unknown (wheel zoom),
+so the ratio between the x position of the positioned events before and
+after the resize is measured, and the candidate transition whose ratio is
+closest (in log space) is chosen, provided it is within
+<code class="docutils literal notranslate"><span class="pre">log_tolerance</span></code>.</p></li>
+</ul>
+</li>
+<li><p>Resizes that cannot be resolved are labelled <code class="docutils literal notranslate"><span class="pre">unresolved</span></code>. Because the
+error propagates to the following steps, the scale is considered unknown
+from that point on.</p></li>
+<li><p>The cumulative scale is applied to every event with a valid position:
+<code class="docutils literal notranslate"><span class="pre">x_normalized</span> <span class="pre">=</span> <span class="pre">x</span> <span class="pre">/</span> <span class="pre">cumulative_scale</span></code> (same for y).</p></li>
+</ol>
+</section>
+<section id="discrete-zoom-levels">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Discrete zoom levels</a><a class="headerlink" href="#discrete-zoom-levels" title="Link to this heading">¶</a></h3>
+<p>Each browser exposes a fixed list of zoom steps. The browser name is matched
+case-insensitively as a substring. Unknown browsers fall back to the Chromium
+steps.</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Browser</p></th>
+<th class="head"><p>Zoom steps</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Chrome, Edge, Opera</p></td>
+<td><p>0.25, 0.33, 0.5, 0.67, 0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5,
+3, 4, 5</p></td>
+</tr>
+<tr class="row-odd"><td><p>Firefox</p></td>
+<td><p>0.3, 0.5, 0.67, 0.8, 0.9, 1, 1.1, 1.2, 1.33, 1.5, 1.7, 2, 2.4, 3, 4, 5</p></td>
+</tr>
+<tr class="row-even"><td><p>Safari</p></td>
+<td><p>0.5, 0.75, 0.85, 1, 1.15, 1.25, 1.5, 1.75, 2, 3, 4, 5 (verify against
+the versions you support)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="api">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">API</a><a class="headerlink" href="#api" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="normalize_zoom">
+<span class="sig-name descname"><span class="pre">normalize_zoom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trace_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">browser_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_gap_ms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">150</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.04</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_valid_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_zoom_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom_key_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_diagnostics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#normalize_zoom" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize the coordinates of <strong>one session</strong> so that they do not depend on
+the browser zoom. Raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> if the trace contains more than one
+<code class="docutils literal notranslate"><span class="pre">SESSION_ID</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trace_df</strong> (<em>pandas.DataFrame</em>) – The trace of a single session. It must
+contain the columns <code class="docutils literal notranslate"><span class="pre">TIME_STAMP</span></code>, <code class="docutils literal notranslate"><span class="pre">EVENT_TYPE</span></code>, <code class="docutils literal notranslate"><span class="pre">KEY_VALUE</span></code>, <code class="docutils literal notranslate"><span class="pre">X</span></code>
+and <code class="docutils literal notranslate"><span class="pre">Y</span></code> (see <code class="docutils literal notranslate"><span class="pre">ColumnNames</span></code>).</p></li>
+<li><p><strong>browser_name</strong> (<em>str</em>) – Browser used in the session (only one). Case
+insensitive. One of <code class="docutils literal notranslate"><span class="pre">chrome</span></code>, <code class="docutils literal notranslate"><span class="pre">edge</span></code>, <code class="docutils literal notranslate"><span class="pre">opera</span></code>, <code class="docutils literal notranslate"><span class="pre">firefox</span></code> or
+<code class="docutils literal notranslate"><span class="pre">safari</span></code>. Empty or unknown names use the Chromium steps.</p></li>
+<li><p><strong>max_gap_ms</strong> (<em>int</em>) – Maximum gap, in milliseconds, between consecutive
+zoom-related events (scroll, wheel, resize, zoom key) to consider them
+part of the same zoom burst.</p></li>
+<li><p><strong>log_tolerance</strong> (<em>float</em>) – Maximum distance, in log space, between the
+measured ratio and the nearest candidate zoom ratio. <code class="docutils literal notranslate"><span class="pre">0.04</span></code> is about
+4 %.</p></li>
+<li><p><strong>min_valid_x</strong> (<em>int</em>) – Minimum x position (px) of the event <em>before</em> a
+resize for a measurement to be trusted. Near the left edge the ratio is
+numerically unreliable.</p></li>
+<li><p><strong>initial_zoom_factor</strong> (<em>float</em>) – Zoom the session started with. The
+closest level in the browser’s list is used. <code class="docutils literal notranslate"><span class="pre">1.0</span></code> means 100 %.</p></li>
+<li><p><strong>zoom_key_mask</strong> – Optional function that receives the trace and returns
+a boolean Series. Only keyboard events where it is <code class="docutils literal notranslate"><span class="pre">True</span></code> count as zoom
+keys. Use it to require the Ctrl/Cmd modifier and to keep only key-down
+events, so that typing <code class="docutils literal notranslate"><span class="pre">+</span></code>, <code class="docutils literal notranslate"><span class="pre">-</span></code> or <code class="docutils literal notranslate"><span class="pre">0</span></code> in a text field is not
+interpreted as zoom.</p></li>
+<li><p><strong>keep_diagnostics</strong> (<em>bool</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, keep the <code class="docutils literal notranslate"><span class="pre">zoom_classification</span></code>,
+<code class="docutils literal notranslate"><span class="pre">zoom_break</span></code> and <code class="docutils literal notranslate"><span class="pre">cumulative_scale</span></code> columns (see below).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The trace, sorted by timestamp (stable sort, index reset), with
+<code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">Y</span></code> replaced by their zoom-normalized values. Events with
+the <code class="docutils literal notranslate"><span class="pre">-1</span></code> sentinel (no position) are left untouched.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="normalize_zoom_sessions">
+<span class="sig-name descname"><span class="pre">normalize_zoom_sessions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">browser_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#normalize_zoom_sessions" title="Link to this definition">¶</a></dt>
+<dd><p>Apply <code class="docutils literal notranslate"><span class="pre">normalize_zoom</span></code> independently to each session (grouped by
+<code class="docutils literal notranslate"><span class="pre">SESSION_ID</span></code>). The zoom state is never shared between sessions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – Data of one or more sessions.</p></li>
+<li><p><strong>browser_name</strong> (<em>str</em>) – Browser used in all the sessions.</p></li>
+<li><p><strong>kwargs</strong> – Any other keyword argument accepted by <code class="docutils literal notranslate"><span class="pre">normalize_zoom</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The concatenation of the normalized sessions, with the index
+reset. Rows are sorted by timestamp within each session.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="diagnostic-columns">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">Diagnostic columns</a><a class="headerlink" href="#diagnostic-columns" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">normalize_coordinates_for_zoom</span></code> (and <code class="docutils literal notranslate"><span class="pre">normalize_zoom</span></code> with
+<code class="docutils literal notranslate"><span class="pre">keep_diagnostics=True</span></code>) expose how each resize was resolved:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">zoom_classification</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;key&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;measured&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;unresolved&quot;</span></code> on each resize row, empty
+elsewhere.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">zoom_break</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">True</span></code> from the first unresolved resize onward. The scale is unknown
+from there, so the following coordinates should be treated with care
+or discarded.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cumulative_scale</span></code></p></td>
+<td><p>Product of the old/new zoom ratios up to each row.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="helper-functions">
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">Helper functions</a><a class="headerlink" href="#helper-functions" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">get_zoom_levels_for_browser</span></code></p></td>
+<td><p>Returns the array of zoom steps for a browser name.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">find_zoom_bursts</span></code></p></td>
+<td><p>Groups wheel/scroll/resize/zoom-key events into bursts and keeps those
+containing a resize. Also returns the direction (<code class="docutils literal notranslate"><span class="pre">in</span></code>/<code class="docutils literal notranslate"><span class="pre">out</span></code>/
+<code class="docutils literal notranslate"><span class="pre">reset</span></code>) of each genuine zoom key.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">find_anchor_events</span></code></p></td>
+<td><p>Selects the positioned events used to measure a ratio: the last one
+before the burst, those inside it, and the first one after it.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">list_possible_zoom_transitions</span></code></p></td>
+<td><p>Lists candidate <code class="docutils literal notranslate"><span class="pre">(new_level_index,</span> <span class="pre">ratio)</span></code> pairs, where
+<code class="docutils literal notranslate"><span class="pre">ratio</span> <span class="pre">=</span> <span class="pre">old</span> <span class="pre">zoom</span> <span class="pre">/</span> <span class="pre">new</span> <span class="pre">zoom</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">choose_zoom_transition</span></code></p></td>
+<td><p>Picks the transition to apply, either from the key direction or from
+the measured ratio. Returns <code class="docutils literal notranslate"><span class="pre">(new_level_index,</span> <span class="pre">ratio)</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="limitations">
+<h3><a class="toc-backref" href="#id10" role="doc-backlink">Limitations</a><a class="headerlink" href="#limitations" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>The ratio of a wheel zoom is measured from the x positions around the
+resize. It assumes that the pointer did not move and that there was no
+horizontal scroll in between; otherwise the ratio is contaminated (the
+<code class="docutils literal notranslate"><span class="pre">log_tolerance</span></code> only mitigates this partially).</p></li>
+<li><p>Zoom steps are discrete, which is how desktop browsers behave. Pinch zoom on
+mobile and tablet is continuous (visual viewport) and is <strong>not</strong> modelled.</p></li>
+<li><p>Zoom keys are detected by their key value only. Pass <code class="docutils literal notranslate"><span class="pre">zoom_key_mask</span></code> if your
+trace records the Ctrl/Cmd modifier or distinguishes key-down from key-up
+events; otherwise typing <code class="docutils literal notranslate"><span class="pre">+</span></code>, <code class="docutils literal notranslate"><span class="pre">-</span></code> or <code class="docutils literal notranslate"><span class="pre">0</span></code> can be mistaken for zoom, and
+repeated key events can make the key count differ from the resize count (the
+burst is then resolved by measurement).</p></li>
+<li><p>After an unresolved resize the scale is unknown (<code class="docutils literal notranslate"><span class="pre">zoom_break</span></code>).</p></li>
+</ul>
+</section>
+</section>
+<section id="screen-size-normalization">
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">Screen-size normalization</a><a class="headerlink" href="#screen-size-normalization" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">normalize_coordinates_to_screen</span></code> normalizes every session with its own
+screen size. By default the screen size of a session is the most frequent
+(mode) value of <code class="docutils literal notranslate"><span class="pre">SCREEN_WIDTH</span></code> and <code class="docutils literal notranslate"><span class="pre">SCREEN_HEIGHT</span></code>.</p>
+<section id="id1">
+<h3><a class="toc-backref" href="#id12" role="doc-backlink">API</a><a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="normalize_coordinates_to_screen">
+<span class="sig-name descname"><span class="pre">normalize_coordinates_to_screen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ColumnNames.X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ColumnNames.Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'diagonal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'normalized'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelsX</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1920</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelsY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1080</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">screen_size_source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mode'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#normalize_coordinates_to_screen" title="Link to this definition">¶</a></dt>
+<dd><p>Normalize pointer coordinates by screen size, independently for each
+session.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – Data of one or more sessions. It must pass
+<code class="docutils literal notranslate"><span class="pre">validate_dataframe</span></code> and contain <code class="docutils literal notranslate"><span class="pre">SESSION_ID</span></code>, <code class="docutils literal notranslate"><span class="pre">SCREEN_WIDTH</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SCREEN_HEIGHT</span></code> and the coordinate columns.</p></li>
+<li><p><strong>x_col</strong> (<em>str</em>) – Name of the x coordinate column.</p></li>
+<li><p><strong>y_col</strong> (<em>str</em>) – Name of the y coordinate column.</p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – <code class="docutils literal notranslate"><span class="pre">&quot;diagonal&quot;</span></code> (default) or <code class="docutils literal notranslate"><span class="pre">&quot;per_axis&quot;</span></code>. See
+<a class="reference internal" href="#normalization-modes"><span class="std std-ref">Normalization modes</span></a>.</p></li>
+<li><p><strong>unit</strong> (<em>str</em>) – <code class="docutils literal notranslate"><span class="pre">&quot;normalized&quot;</span></code> (default) returns unit-less values.
+<code class="docutils literal notranslate"><span class="pre">&quot;pixels&quot;</span></code> multiplies the normalized values back by a reference
+resolution of <code class="docutils literal notranslate"><span class="pre">pixelsX</span></code> x <code class="docutils literal notranslate"><span class="pre">pixelsY</span></code>.</p></li>
+<li><p><strong>pixelsX</strong> (<em>int</em>) – Reference width in pixels (only used with
+<code class="docutils literal notranslate"><span class="pre">unit=&quot;pixels&quot;</span></code>).</p></li>
+<li><p><strong>pixelsY</strong> (<em>int</em>) – Reference height in pixels (only used with
+<code class="docutils literal notranslate"><span class="pre">unit=&quot;pixels&quot;</span></code>).</p></li>
+<li><p><strong>screen_size_source</strong> (<em>str</em>) – How the screen size of each session is
+chosen. <code class="docutils literal notranslate"><span class="pre">&quot;mode&quot;</span></code> (default) uses the most frequent value. <code class="docutils literal notranslate"><span class="pre">&quot;first&quot;</span></code>
+uses the first valid value in row order; use it (after sorting by
+timestamp) when the reported screen size changes with the browser zoom
+during the session, since the first value corresponds to the initial
+zoom.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A copy of <code class="docutils literal notranslate"><span class="pre">df</span></code> with <code class="docutils literal notranslate"><span class="pre">x_col</span></code> and <code class="docutils literal notranslate"><span class="pre">y_col</span></code> replaced by the
+normalized values. The <code class="docutils literal notranslate"><span class="pre">-1</span></code> sentinels (events with no position) are
+preserved. If the screen size of a session is missing or not positive,
+the coordinates of its positioned events become <code class="docutils literal notranslate"><span class="pre">NaN</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">mode</span></code>, <code class="docutils literal notranslate"><span class="pre">unit</span></code> or <code class="docutils literal notranslate"><span class="pre">screen_size_source</span></code> are
+invalid, or if a required column is missing.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="normalization-modes">
+<span id="id2"></span><h3><a class="toc-backref" href="#id13" role="doc-backlink">Normalization modes</a><a class="headerlink" href="#normalization-modes" title="Link to this heading">¶</a></h3>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">mode=&quot;diagonal&quot;</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">/</span> <span class="pre">d</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">/</span> <span class="pre">d</span></code>, with <code class="docutils literal notranslate"><span class="pre">d</span> <span class="pre">=</span> <span class="pre">sqrt(w**2</span> <span class="pre">+</span> <span class="pre">h**2)</span></code>. The same scale is
+applied to both axes, so the geometry is preserved: circles stay circles,
+and distances, velocities, angles and curvature remain comparable across
+devices. It is also invariant to rotation (<code class="docutils literal notranslate"><span class="pre">w</span></code> and <code class="docutils literal notranslate"><span class="pre">h</span></code> swap but the
+diagonal does not). Use it for <strong>distances and movement features</strong>. Values
+do <strong>not</strong> fill the range 0-1 (see below).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">mode=&quot;per_axis&quot;</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">/</span> <span class="pre">w</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">/</span> <span class="pre">h</span></code>. Values fill 0-1 in both axes, but the scale of each
+axis differs, so the space is <strong>anisotropic</strong>. Use it for <strong>positions,
+heatmaps and regions</strong> within devices that share a similar aspect ratio.</p>
+</dd>
+</dl>
+</section>
+<section id="why-diagonal-does-not-fill-0-1">
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">Why <code class="docutils literal notranslate"><span class="pre">diagonal</span></code> does not fill 0-1</a><a class="headerlink" href="#why-diagonal-does-not-fill-0-1" title="Link to this heading">¶</a></h3>
+<p>The diagonal is always longer than either side of the screen. For a point
+inside the screen:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">x</span></code> in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">w]</span></code> gives <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">/</span> <span class="pre">d</span></code> in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">w</span> <span class="pre">/</span> <span class="pre">d]</span></code>, with <code class="docutils literal notranslate"><span class="pre">w</span> <span class="pre">/</span> <span class="pre">d</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code> in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">h]</span></code> gives <code class="docutils literal notranslate"><span class="pre">y</span> <span class="pre">/</span> <span class="pre">d</span></code> in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">h</span> <span class="pre">/</span> <span class="pre">d]</span></code>, with <code class="docutils literal notranslate"><span class="pre">h</span> <span class="pre">/</span> <span class="pre">d</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>.</p></li>
+</ul>
+<p>Moreover, <code class="docutils literal notranslate"><span class="pre">w</span> <span class="pre">/</span> <span class="pre">d</span></code> and <code class="docutils literal notranslate"><span class="pre">h</span> <span class="pre">/</span> <span class="pre">d</span></code> are the cosine and the sine of the angle
+between the diagonal and the horizontal, so <code class="docutils literal notranslate"><span class="pre">(w/d)**2</span> <span class="pre">+</span> <span class="pre">(h/d)**2</span> <span class="pre">=</span> <span class="pre">1</span></code>: when
+one is close to 1 the other is small. For a 1920x1080 screen the maximum values
+are 0.87 (x) and 0.49 (y); for a square screen they are 0.71 in both axes. The
+bound 1 is never reached. This is the price of using a single scale for both
+axes: the screen remains a rectangle with its original aspect ratio inside the
+unit square instead of being stretched to fill it.</p>
+</section>
+<section id="what-happens-when-the-aspect-ratio-differs">
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">What happens when the aspect ratio differs</a><a class="headerlink" href="#what-happens-when-the-aspect-ratio-differs" title="Link to this heading">¶</a></h3>
+<p>The following table shows three typical devices (in CSS pixels).</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22.0%" />
+<col style="width: 14.0%" />
+<col style="width: 22.0%" />
+<col style="width: 21.0%" />
+<col style="width: 21.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Device</p></th>
+<th class="head"><p>Diagonal</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">diagonal</span></code>: max x / max y</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">per_axis</span></code>: 0.1 in x</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">per_axis</span></code>: 0.1 in y</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Desktop 1920x1080</p></td>
+<td><p>2203</p></td>
+<td><p>0.87 / 0.49</p></td>
+<td><p>192 px</p></td>
+<td><p>108 px</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tablet 1280x800</p></td>
+<td><p>1509</p></td>
+<td><p>0.85 / 0.53</p></td>
+<td><p>128 px</p></td>
+<td><p>80 px</p></td>
+</tr>
+<tr class="row-even"><td><p>Mobile 390x844</p></td>
+<td><p>930</p></td>
+<td><p>0.42 / 0.91</p></td>
+<td><p>39 px</p></td>
+<td><p>84 px</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul class="simple">
+<li><p>With <code class="docutils literal notranslate"><span class="pre">diagonal</span></code>, the bottom-right corner is (0.87, 0.49) on desktop and
+(0.42, 0.91) on mobile. Distances are comparable, but positions are not, so
+it is unsuitable for heatmaps or regions across aspect ratios.</p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">per_axis</span></code>, the same normalized offset in x and in y corresponds to
+different physical distances, and the relation inverts between landscape and
+portrait devices. Euclidean distances, angles and curvature are distorted.</p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">unit=&quot;pixels&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">per_axis</span></code>, mapping a 390x844 screen to
+1920x1080 stretches x by 4.9 and y by 1.28 (a 3.8x deformation between
+axes). With <code class="docutils literal notranslate"><span class="pre">diagonal</span></code> the factor is uniform (2.37), so there is no
+distortion, although the result may exceed 1080 in y.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Both modes normalize by <em>relative</em> screen size, not by physical size. A
+diagonal fraction of 0.1 is about 2.4” on a 24” monitor and about 0.6” on a
+phone. This is appropriate if the hypothesis is “what fraction of the screen
+did the pointer travel”, but not for motor-effort analysis (e.g. Fitts’ law).
+Mouse and touch are also different interactions that no normalization
+equates.</p>
+</div>
+</section>
+</section>
+<section id="recommendations">
+<h2><a class="toc-backref" href="#id16" role="doc-backlink">Recommendations</a><a class="headerlink" href="#recommendations" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Distances, velocities and trajectories</strong>: use <code class="docutils literal notranslate"><span class="pre">mode=&quot;diagonal&quot;</span></code>.</p></li>
+<li><p><strong>Positions and heatmaps across devices</strong>: do not mix aspect ratios in the
+same map. Group sessions by device class or orientation and use
+<code class="docutils literal notranslate"><span class="pre">mode=&quot;per_axis&quot;</span></code> inside each group. For long pages, normalize y by the
+document height or use <code class="docutils literal notranslate"><span class="pre">clientY</span></code> instead of <code class="docutils literal notranslate"><span class="pre">pageY</span></code>.</p></li>
+<li><p><strong>Keep covariates</strong>: store <code class="docutils literal notranslate"><span class="pre">aspect_ratio</span></code> and orientation per session so
+they can be controlled for in the analysis.</p></li>
+<li><p><strong>Apply zoom normalization first</strong>, then screen normalization (see the note
+at the top of this document).</p></li>
+<li><p><strong>Check how the screen size behaves with zoom</strong> in your capture. If
+<code class="docutils literal notranslate"><span class="pre">SCREEN_WIDTH</span></code> / <code class="docutils literal notranslate"><span class="pre">SCREEN_HEIGHT</span></code> change when the user zooms, use
+<code class="docutils literal notranslate"><span class="pre">screen_size_source=&quot;first&quot;</span></code> on data sorted by timestamp.</p></li>
+<li><p><strong>Avoid</strong> <code class="docutils literal notranslate"><span class="pre">unit=&quot;pixels&quot;</span></code> with <code class="docutils literal notranslate"><span class="pre">per_axis</span></code> when the source and target
+aspect ratios differ.</p></li>
+</ul>
+</section>
+<section id="caveats-and-pitfalls">
+<h2><a class="toc-backref" href="#id17" role="doc-backlink">Caveats and pitfalls</a><a class="headerlink" href="#caveats-and-pitfalls" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Coordinates are ``pageX`` / ``pageY``</strong>, not <code class="docutils literal notranslate"><span class="pre">clientX</span></code> / <code class="docutils literal notranslate"><span class="pre">clientY</span></code>.
+<code class="docutils literal notranslate"><span class="pre">y</span></code> therefore includes the scroll offset and can be much larger than
+<code class="docutils literal notranslate"><span class="pre">screen_height</span></code>; <code class="docutils literal notranslate"><span class="pre">x</span></code> can exceed <code class="docutils literal notranslate"><span class="pre">screen_width</span></code> with horizontal scroll.
+With <code class="docutils literal notranslate"><span class="pre">per_axis</span></code>, y / h is not bounded by 1. Normalizing by the screen
+rather than the viewport also adds noise when the window is not maximized.</p></li>
+<li><p><strong>One screen size per session.</strong> If the screen size changes within a session
+(rotation on tablet/mobile), part of the events is normalized with the wrong
+value. <code class="docutils literal notranslate"><span class="pre">diagonal</span></code> is robust to rotation; <code class="docutils literal notranslate"><span class="pre">per_axis</span></code> is not.</p></li>
+<li><p><strong>Columns are overwritten.</strong> <code class="docutils literal notranslate"><span class="pre">normalize_coordinates_to_screen</span></code> replaces
+<code class="docutils literal notranslate"><span class="pre">x_col</span></code> and <code class="docutils literal notranslate"><span class="pre">y_col</span></code>, and <code class="docutils literal notranslate"><span class="pre">normalize_zoom</span></code> replaces <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">Y</span></code>.
+Applying a step twice normalizes twice.</p></li>
+<li><p><strong>Zoom normalization works on one session at a time.</strong> Use
+<code class="docutils literal notranslate"><span class="pre">normalize_zoom_sessions</span></code> for several sessions.</p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Guillermo Dylan Carvajal Aza, Alejandro Álvarez Varela
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Coordinate Normalization</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#zoom-normalization">Zoom normalization</a><ul>
+<li><a class="reference internal" href="#how-it-works">How it works</a></li>
+<li><a class="reference internal" href="#discrete-zoom-levels">Discrete zoom levels</a></li>
+<li><a class="reference internal" href="#api">API</a><ul>
+<li><a class="reference internal" href="#normalize_zoom"><code class="docutils literal notranslate"><span class="pre">normalize_zoom()</span></code></a></li>
+<li><a class="reference internal" href="#normalize_zoom_sessions"><code class="docutils literal notranslate"><span class="pre">normalize_zoom_sessions()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#diagnostic-columns">Diagnostic columns</a></li>
+<li><a class="reference internal" href="#helper-functions">Helper functions</a></li>
+<li><a class="reference internal" href="#limitations">Limitations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#screen-size-normalization">Screen-size normalization</a><ul>
+<li><a class="reference internal" href="#id1">API</a><ul>
+<li><a class="reference internal" href="#normalize_coordinates_to_screen"><code class="docutils literal notranslate"><span class="pre">normalize_coordinates_to_screen()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#normalization-modes">Normalization modes</a></li>
+<li><a class="reference internal" href="#why-diagonal-does-not-fill-0-1">Why <code class="docutils literal notranslate"><span class="pre">diagonal</span></code> does not fill 0-1</a></li>
+<li><a class="reference internal" href="#what-happens-when-the-aspect-ratio-differs">What happens when the aspect ratio differs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#recommendations">Recommendations</a></li>
+<li><a class="reference internal" href="#caveats-and-pitfalls">Caveats and pitfalls</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=08bfcbec"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
