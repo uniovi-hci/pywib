@@ -9,6 +9,7 @@ from pywib.utils.movement import (auc_df, auc_traces, flips, _apply_metric_to_tr
                                    _compute_angles, angular_acceleration_df, angular_velocity_df)
 from pywib.utils.utils import deprecated
 from pywib.utils.validation import validate_any_not_none, validate_traces
+from pywib.utils.batch import concat_session, space_time_diff_grouped, split_aligned
 
 def path(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, per_traces:bool = True) -> pd.DataFrame | dict[str, list[pd.DataFrame]]:
     """
@@ -41,11 +42,29 @@ def path(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]] = None, 
             for i in range(len(session_traces)):
                 validate_dataframe(session_traces[i])
 
-            # Compute the distance for each trace
+            combined, sizes, ok = concat_session(session_traces)
+            if ok and combined is not None:
+                # Same order as _path: filter off-screen, then diff, then
+                # distance — split_aligned restores index alignment so rows
+                # dropped by the filter get NaN, like assigning a filtered
+                # Series onto the original trace.
+                combined = combined[(combined[ColumnNames.X] > -1) & (combined[ColumnNames.Y] > -1)]
+                combined = space_time_diff_grouped(combined)
+                combined[ColumnNames.DISTANCE] = np.hypot(
+                    combined[ColumnNames.DX], combined[ColumnNames.DY]
+                )
+                traces[session_id] = split_aligned(
+                    combined, session_traces, ColumnNames.DISTANCE
+                )
+                continue
+            if combined is None:
+                traces[session_id] = split_aligned(
+                    None, session_traces, ColumnNames.DISTANCE
+                )
+                continue
+            # Duplicated index within a trace: original per-trace path.
             for j in range(len(session_traces)):
                 session_traces[j][ColumnNames.DISTANCE] = _path(session_traces[j])[ColumnNames.DISTANCE]
-            
-            # Store the traces with distance in the dictionary
             traces[session_id] = session_traces
 
     return traces
@@ -80,7 +99,20 @@ def total_distance(df: pd.DataFrame = None, traces: dict[str, list[pd.DataFrame]
 
     session_distances = {}
     for session_id, session_traces in traces.items():
-            # Compute the distance for each trace
+            combined, sizes, ok = concat_session(session_traces)
+            if ok and combined is not None:
+                combined = combined[(combined[ColumnNames.X] > -1) & (combined[ColumnNames.Y] > -1)]
+                combined = space_time_diff_grouped(combined)
+                combined[ColumnNames.DISTANCE] = np.hypot(
+                    combined[ColumnNames.DX], combined[ColumnNames.DY]
+                )
+                session_distances[session_id] = float(
+                    combined[ColumnNames.DISTANCE].sum()
+                )
+                continue
+            if combined is None:
+                session_distances[session_id] = 0.0
+                continue
             total_session_distance = 0
             for j in range(len(session_traces)):
                 total_session_distance += _path(session_traces[j])[ColumnNames.DISTANCE].sum()
