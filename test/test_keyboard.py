@@ -171,9 +171,15 @@ class TestKeyboard(unittest.TestCase):
 
     def test_typing_durations_single(self):
         df = self.test_data_simple.copy()
-        durations = typing_durations(df, per_traces=False, single=True)
+        durations = typing_durations(df[df["sessionId"] == "K"], per_traces=False, single=True)
         self.assertEqual(durations[0], [50])
         self.assertEqual(durations[1], [60])
+
+    def test_avg_keydown_to_keyup_duration(self):
+        df = self.test_data_simple.copy()
+        durations = typing_speed_metrics(df)
+        self.assertAlmostEqual(float(300.0/4), durations["H"]["avg_keydown_to_keyup_duration"])
+
 
 if __name__ == '__main__':
     unittest.main()

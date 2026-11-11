@@ -102,14 +102,18 @@ def typing_speed_metrics(df: pd.DataFrame = None, traces: dict[str, list[pd.Data
             avg_speed = np.mean(speeds)
             total_chars = sum(session_traces[session_traces[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_DOWN][ColumnNames.EVENT_TYPE].count() for session_traces in traces[session_id])
             total_time = sum((session_traces[ColumnNames.TIME_STAMP].diff().fillna(0).sum() / 1000.0) for session_traces in traces[session_id])
-            keydown_to_keyup_durations = [
-                keyup_time - keydown_time
-                for trace in traces[session_id]
-                for keydown_time, keyup_time in zip(
-                    trace[trace[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_DOWN][ColumnNames.TIME_STAMP].values,
-                    trace[trace[ColumnNames.EVENT_TYPE] == EventTypes.EVENT_KEY_UP][ColumnNames.TIME_STAMP].values,
-                )
-            ]
+            keydown_to_keyup_durations = []
+            for trace in traces[session_id]:
+                pending_keydowns = {} # key_value -> timestamp
+                for event_type, timestamp, key_value in trace[
+                    [ColumnNames.EVENT_TYPE, ColumnNames.TIME_STAMP, ColumnNames.KEY_VALUE]
+                ].itertuples(index=False, name=None):
+                    if event_type == EventTypes.EVENT_KEY_DOWN:
+                        pending_keydowns.setdefault(key_value, timestamp) # Ignore repeated keyDowns
+                    elif event_type == EventTypes.EVENT_KEY_UP:
+                        start = pending_keydowns.pop(key_value, None)
+                        if start is not None:   # `is not None`, not truthiness, so t=0 works
+                            keydown_to_keyup_durations.append(timestamp - start)
             avg_keydown_to_keyup_duration = (
                 np.mean(keydown_to_keyup_durations)
                 if keydown_to_keyup_durations
