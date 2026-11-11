@@ -5,6 +5,19 @@ All notable changes to PyWIB will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.1] - 2026-11-11
+
+### Changed
+- Updated return type annotations of `typing_durations`, `typing_durations_df` and `typing_durations_traces` to reflect that they can return `float` values (with `single=True`) or per-session dictionaries. (#55)
+
+### Fixed
+- Bugs in `typing_durations` and its helpers in `core/keyboard` and `utils/keyboard`. Results may differ from previous versions. (#55)
+- Bug in the direction-change metrics (`direction_changes`, `x_flips`, `y_flips`). Results may differ from previous versions. (#58)
+  - As part of the fix, `direction_changes`, `x_flips` and `y_flips` accept an optional `per_user` argument, and `direction_changes` accepts an optional `threshold` (radians, default `np.pi / 4`).
+  
+### Documentation
+- Added an interview section to the README.
+
 ## [3.0.0] - 2026-11-05
 
 ### Added
